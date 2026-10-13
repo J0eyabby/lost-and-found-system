@@ -1,6 +1,6 @@
 
 <?php
-require_once __DIR__ . "/config.local.php";
+require_once __DIR__ . "/config.php";
 
 $conn = new mysqli(
     $host,

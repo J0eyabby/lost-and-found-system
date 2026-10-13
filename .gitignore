@@ -1,6 +1,5 @@
 # Local credentials and configuration
 /config.local.php
-/mail_config.php
 .env
 .env.*
 

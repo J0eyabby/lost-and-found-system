@@ -1,0 +1,16 @@
+.git
+.gitignore
+.env
+.env.*
+config.local.php
+vendor
+uploads/*
+!uploads/.htaccess
+*.sql
+*.sql.gz
+*.dump
+*.log
+*.tmp
+*.bak
+Dockerfile
+render.yaml
