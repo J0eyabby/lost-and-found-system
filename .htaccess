@@ -1,0 +1,5 @@
+Options -Indexes
+
+<FilesMatch "^(config\.local\.php|mail_config\.php|db_test\.php|db_backup\.php|admin_backup\.php|verify_database_backup\.php|.*\.sql(?:\.gz)?)$">
+    Require all denied
+</FilesMatch>

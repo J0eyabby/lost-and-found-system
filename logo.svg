@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Lost and Found</title>
+  <defs>
+    <linearGradient id="tile" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#23877b"/>
+      <stop offset="1" stop-color="#123d3a"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="19" fill="url(#tile)"/>
+  <path d="M32 10.5c-9 0-16.2 7.1-16.2 15.9 0 11.5 16.2 27.1 16.2 27.1s16.2-15.6 16.2-27.1c0-8.8-7.2-15.9-16.2-15.9Z" fill="none" stroke="#d8efeb" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+  <circle cx="32" cy="26.5" r="7.2" fill="#123d3a" stroke="#fff" stroke-width="3"/>
+  <path d="m37.3 31.8 10.2 10.1" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="4.5"/>
+  <circle cx="49.1" cy="43.6" r="3.4" fill="#d8efeb"/>
+</svg>

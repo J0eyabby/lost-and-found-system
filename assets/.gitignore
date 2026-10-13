@@ -1,0 +1,38 @@
+
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+
+# Private database configuration and credentials
+/config.local.php
+/db_backup.php
+/mail_config.php
+/admin_backup.php
+.env
+.env.*
+!.env.example
+secrets/
+
+# Database exports, backups, and schema files
+*.sql
+*.sql.gz
+*.dump
+
+# User-uploaded photos and private files
+/uploads/*
+
+# Temporary files, logs, and backups
+*.tmp
+*.temp
+*.bak
+*.orig
+*.log
+tmp/
+temp/
+
+# Dependencies and generated caches
+/vendor/
+/node_modules/
+.cache/
