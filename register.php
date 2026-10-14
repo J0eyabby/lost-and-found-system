@@ -85,7 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Lost and Found System</title>
 
-<link rel="stylesheet" href="css/style.css?v=20261014">
+<link rel="stylesheet" href="css/style.css?v=theme-20261014-10">
 <script src="navigation.js" defer></script>
 
 </head>

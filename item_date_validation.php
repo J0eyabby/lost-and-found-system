@@ -16,3 +16,15 @@ function isValidPastOrPresentItemDate(mixed $value): bool
     return checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1])
         && $value <= date("Y-m-d");
 }
+
+function isValidPastOrPresentDateRange(mixed $from, mixed $to): bool
+{
+    if (!isValidPastOrPresentItemDate($from) || !isValidPastOrPresentItemDate($to)) {
+        return false;
+    }
+
+    $from = (string) $from;
+    $to = (string) $to;
+
+    return $from === "" || $to === "" || $from <= $to;
+}

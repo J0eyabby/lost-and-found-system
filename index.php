@@ -4,6 +4,7 @@ require_once "db.php";
 require_once __DIR__ . "/account_guard.php";
 require_once __DIR__ . "/smart_assistant.php";
 require_once __DIR__ . "/assets/image_helper.php";
+require_once __DIR__ . "/item_date_validation.php";
 enforceActiveAccount($conn);
 
 function escapeLikeValue(string $value): string
@@ -17,17 +18,16 @@ $status = $_GET["status"] ?? "all";
 $category = trim($_GET["category"] ?? "");
 $location = trim($_GET["location"] ?? "");
 $dateFrom = trim($_GET["date_from"] ?? "");
-$dateTo = trim($_GET["date_to"] ?? "");
+$dateError = "";
 
 // Accept only valid filter options
 if (!in_array($status, ["all", "lost", "found"], true)) {
     $status = "all";
 }
 
-foreach (["dateFrom", "dateTo"] as $dateKey) {
-    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $$dateKey)) {
-        $$dateKey = "";
-    }
+if (!isValidPastOrPresentItemDate($dateFrom)) {
+    $dateError = "Choose a valid incident date up to today.";
+    $dateFrom = "";
 }
 
 $categoryOptions = [];
@@ -65,7 +65,7 @@ if ($status !== "all") {
 }
 
 $filtersActive = $search !== "" || $status !== "all" || $category !== ""
-    || $location !== "" || $dateFrom !== "" || $dateTo !== "";
+    || $location !== "" || $dateFrom !== "";
 if ($category !== "") {
     $sql .= " AND items.category = ?";
     $queryValues[] = $category;
@@ -77,10 +77,6 @@ if ($location !== "") {
 if ($dateFrom !== "") {
     $sql .= " AND items.date_lost_found >= ?";
     $queryValues[] = $dateFrom;
-}
-if ($dateTo !== "") {
-    $sql .= " AND items.date_lost_found <= ?";
-    $queryValues[] = $dateTo;
 }
 
 $sql .= " ORDER BY items.created_at DESC";
@@ -140,8 +136,9 @@ if (isset($_SESSION["user_id"])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lost and Found System</title>
-    <link rel="stylesheet" href="css/style.css?v=20261014">
+    <link rel="stylesheet" href="css/style.css?v=theme-20261014-10">
     <script src="navigation.js" defer></script>
+    <script src="date-range.js" defer></script>
 </head>
 <body>
 <?php require __DIR__ . "/site_header.php"; ?>
@@ -229,16 +226,14 @@ if (isset($_SESSION["user_id"])) {
                 </div>
 
                 <div class="field-group date-filter-group">
-                    <label for="date-from">From date</label>
+                    <label for="date-from">Incident date from</label>
                     <input type="date" id="date-from" name="date_from"
                         max="<?= date("Y-m-d") ?>" value="<?= htmlspecialchars($dateFrom) ?>">
                 </div>
 
-                <div class="field-group date-filter-group">
-                    <label for="date-to">To date</label>
-                    <input type="date" id="date-to" name="date_to"
-                        max="<?= date("Y-m-d") ?>" value="<?= htmlspecialchars($dateTo) ?>">
-                </div>
+                <?php if ($dateError !== ""): ?>
+                    <p class="form-error full-width" role="alert"><?= htmlspecialchars($dateError, ENT_QUOTES, "UTF-8") ?></p>
+                <?php endif; ?>
 
                 <div class="search-actions">
                     <button class="search-submit" type="submit" aria-label="Search items" title="Search">

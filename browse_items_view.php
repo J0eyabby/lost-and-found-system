@@ -4,6 +4,7 @@ require_once __DIR__ . "/db.php";
 require_once __DIR__ . "/account_guard.php";
 require_once __DIR__ . "/smart_assistant.php";
 require_once __DIR__ . "/assets/image_helper.php";
+require_once __DIR__ . "/item_date_validation.php";
 enforceActiveAccount($conn);
 
 $userId = (int) ($_SESSION["user_id"] ?? 0);
@@ -15,11 +16,12 @@ $category = trim($_GET["category"] ?? "");
 $location = trim($_GET["location"] ?? "");
 $dateFrom = trim($_GET["date_from"] ?? "");
 $dateTo = trim($_GET["date_to"] ?? "");
+$dateError = "";
 
-foreach (["dateFrom", "dateTo"] as $dateKey) {
-    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $$dateKey)) {
-        $$dateKey = "";
-    }
+if (!isValidPastOrPresentDateRange($dateFrom, $dateTo)) {
+    $dateError = "Choose valid dates up to today, with the From date no later than the To date.";
+    $dateFrom = "";
+    $dateTo = "";
 }
 
 $categoryOptions = [];
@@ -88,7 +90,8 @@ if ($userId > 0) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($browseTitle) ?> - Lost and Found</title>
-    <link rel="stylesheet" href="css/style.css?v=20261014">
+    <link rel="stylesheet" href="css/style.css?v=theme-20261014-10">
+    <script src="date-range.js" defer></script>
 </head>
 <body>
 <?php require __DIR__ . "/site_header.php"; ?>
@@ -117,11 +120,14 @@ if ($userId > 0) {
         </select>
         <label for="location">Location</label>
         <input id="location" name="location" type="search" value="<?= htmlspecialchars($location) ?>" placeholder="Location">
-        <label for="date-from">From date</label>
+        <label for="date-from">Incident date from</label>
         <input id="date-from" name="date_from" type="date" max="<?= date("Y-m-d") ?>" value="<?= htmlspecialchars($dateFrom) ?>">
-        <label for="date-to">To date</label>
+        <label for="date-to">Incident date to</label>
         <input id="date-to" name="date_to" type="date" max="<?= date("Y-m-d") ?>" value="<?= htmlspecialchars($dateTo) ?>">
         <button type="submit">Search</button>
+        <?php if ($dateError !== ""): ?>
+            <p class="form-error" role="alert"><?= htmlspecialchars($dateError, ENT_QUOTES, "UTF-8") ?></p>
+        <?php endif; ?>
         <?php if ($filtersActive): ?>
             <a href="<?= htmlspecialchars($browseStatus === "lost" ? "lost_items.php" : "found_items.php") ?>" class="clear-link">Clear filters</a>
         <?php endif; ?>

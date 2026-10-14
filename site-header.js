@@ -11,6 +11,7 @@ document.addEventListener("click", (event) => {
             const otherToggle = document.querySelector(`[aria-controls="${otherMenu.id}"]`);
             otherToggle?.setAttribute("aria-expanded", "false");
         });
+
         if (menu && isOpening) {
             menu.hidden = false;
             menu.classList.add("is-open");

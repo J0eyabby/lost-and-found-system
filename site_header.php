@@ -10,7 +10,7 @@ $siteProfilePhoto = "";
 $siteFullName = (string) ($_SESSION["full_name"] ?? "");
 $siteEmail = "";
 $siteLanguage = (string) ($_SESSION["preferred_language"] ?? "en");
-$siteTheme = (string) ($_SESSION["site_theme"] ?? "light");
+$siteTheme = "dark";
 $siteBrand = "LOST AND FOUND";
 $siteLogo = "";
 $siteContactEmail = "";
@@ -65,9 +65,6 @@ if ($siteUserId > 0) {
 if (!in_array($siteLanguage, $siteLanguages, true)) {
     $siteLanguage = "en";
 }
-if (!in_array($siteTheme, ["light", "dark"], true)) {
-    $siteTheme = "light";
-}
 $siteSettingsQuery = $conn->query("SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ('site_name', 'site_logo', 'contact_email')");
 if ($siteSettingsQuery) {
     while ($siteSetting = $siteSettingsQuery->fetch_assoc()) {
@@ -83,7 +80,7 @@ if ($siteSettingsQuery) {
 $siteLogo = trim($siteLogo);
 $siteProfilePhoto = basename((string) $siteProfilePhoto);
 ?>
-<script>document.documentElement.dataset.theme = <?= json_encode($siteTheme, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;</script>
+<script>document.documentElement.dataset.theme = "dark";</script>
 <header class="site-header">
     <div class="site-header-inner">
         <nav class="site-header-actions" aria-label="Quick navigation" data-i18n-aria="quick_navigation">
@@ -192,6 +189,6 @@ $siteProfilePhoto = basename((string) $siteProfilePhoto);
 </header>
 <script>document.documentElement.lang = <?= json_encode($siteLanguage, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;</script>
 <script src="language.js" defer></script>
-<script src="site-header.js" defer></script>
+<script src="site-header.js?v=theme-20261014" defer></script>
 <script src="password-visibility.js" defer></script>
 <script src="smart-assistant.js?v=chat-20261013" defer></script>

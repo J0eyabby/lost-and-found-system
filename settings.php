@@ -239,7 +239,7 @@ function settingsEscape($value): string
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Settings - Lost and Found</title>
-    <link rel="stylesheet" href="css/style.css?v=20261014">
+    <link rel="stylesheet" href="css/style.css?v=theme-20261014-10">
 </head>
 <body data-settings-panel="<?= settingsEscape($activeSettingsPanel) ?>">
 <?php require __DIR__ . "/site_header.php"; ?>
@@ -257,7 +257,7 @@ function settingsEscape($value): string
 
             <li class="settings-menu-group">Preferences</li>
             <li><a href="#notifications" data-settings-panel="notifications"><strong>Notifications</strong><span>Choose which alerts you receive.</span></a></li>
-            <li><a href="#appearance" data-settings-panel="appearance"><strong>Appearance and dark mode</strong><span>Choose a theme that is comfortable to use.</span></a></li>
+            <li><a href="#appearance" data-settings-panel="appearance"><strong>Website appearance</strong><span>Use the consistent dark theme across the application.</span></a></li>
             <li><a href="#language" data-settings-panel="language"><strong>Language</strong><span>Choose the website display language.</span></a></li>
             <li><a href="#location-preferences" data-settings-panel="search-preferences"><strong>Location</strong><span>Set your preferred town, campus, or area.</span></a></li>
             <li><a href="#accessibility" data-settings-panel="accessibility"><strong>Accessibility</strong><span>Adjust text size and improve readability.</span></a></li>
@@ -351,22 +351,8 @@ function settingsEscape($value): string
         </article>
         <article class="settings-card" id="appearance">
             <p class="eyebrow">Appearance</p>
-            <h2>Website theme</h2>
-            <?php if ($userId > 0): ?>
-                <form method="post" class="stacked-form">
-                    <input type="hidden" name="csrf_token" value="<?= settingsEscape($_SESSION[$csrfKey]) ?>">
-                    <input type="hidden" name="action" value="appearance">
-                    <label for="site-theme">Color theme</label>
-                    <select id="site-theme" name="theme">
-                        <option value="light" <?= $userSettings["theme"] === "light" ? "selected" : "" ?>>Light</option>
-                        <option value="dark" <?= $userSettings["theme"] === "dark" ? "selected" : "" ?>>Dark</option>
-                    </select>
-                    <button type="submit">Save Appearance</button>
-                </form>
-            <?php else: ?>
-                <p>Log in to save your appearance preferences.</p>
-                <a class="button button-small" href="login.php">Log in</a>
-            <?php endif; ?>
+            <h2>Website appearance</h2>
+            <p>The Lost and Found system uses one consistent dark theme across every page.</p>
         </article>
         <article class="settings-card" id="search-preferences">
             <p class="eyebrow">Preferences</p>

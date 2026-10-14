@@ -4,6 +4,7 @@ require_once __DIR__ . "/session_bootstrap.php";
 require_once "db.php";
 require_once "mail_notifications.php";
 require_once __DIR__ . "/user_notifications.php";
+require_once __DIR__ . "/item_date_validation.php";
 require_once __DIR__ . "/activity_log.php";
 require_once __DIR__ . "/smart_assistant.php";
 
@@ -177,6 +178,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 // Retrieve claims, with a review-status filter for the admin queue.
 $claimFilter = $_GET["status"] ?? "all";
+$dateFrom = trim($_GET["date_from"] ?? "");
+$dateTo = trim($_GET["date_to"] ?? "");
+$dateError = "";
+if (!isValidPastOrPresentDateRange($dateFrom, $dateTo)) {
+    $dateError = "Choose valid claim dates up to today, with the From date no later than the To date.";
+    $dateFrom = "";
+    $dateTo = "";
+}
 if (!in_array($claimFilter, ["all", "pending", "approved", "rejected", "needs_info"], true)) {
     $claimFilter = "all";
 }
@@ -202,11 +211,13 @@ $sql = "SELECT
         INNER JOIN users AS owners
             ON items.user_id = owners.user_id
         WHERE (? = 'all' OR claims.claim_status = ?)
+          AND (? = '' OR DATE(claims.claim_date) >= ?)
+          AND (? = '' OR DATE(claims.claim_date) <= ?)
         ORDER BY claims.claim_date DESC
         LIMIT 100";
 
 $claimsQuery = $conn->prepare($sql);
-$claimsQuery->bind_param("ss", $claimFilter, $claimFilter);
+$claimsQuery->bind_param("ssssss", $claimFilter, $claimFilter, $dateFrom, $dateFrom, $dateTo, $dateTo);
 $claimsQuery->execute();
 $result = $claimsQuery->get_result();
 ?>
@@ -217,8 +228,9 @@ $result = $claimsQuery->get_result();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Claims</title>
 
-<link rel="stylesheet" href="css/style.css?v=20261014">
+<link rel="stylesheet" href="css/style.css?v=theme-20261014-10">
 <script src="navigation.js" defer></script>
+<script src="date-range.js" defer></script>
 
 </head>
 <body class="admin-theme">
@@ -259,6 +271,20 @@ $result = $claimsQuery->get_result();
                 </a>
             <?php endforeach; ?>
         </nav>
+        <form method="get" class="date-filter-form">
+            <input type="hidden" name="status" value="<?= htmlspecialchars($claimFilter, ENT_QUOTES, "UTF-8") ?>">
+            <label for="claim-date-from">Submitted from</label>
+            <input id="claim-date-from" name="date_from" type="date" max="<?= date("Y-m-d") ?>" value="<?= htmlspecialchars($dateFrom, ENT_QUOTES, "UTF-8") ?>">
+            <label for="claim-date-to">Submitted to</label>
+            <input id="claim-date-to" name="date_to" type="date" max="<?= date("Y-m-d") ?>" value="<?= htmlspecialchars($dateTo, ENT_QUOTES, "UTF-8") ?>">
+            <button class="button button-small" type="submit">Apply dates</button>
+            <?php if ($dateFrom !== "" || $dateTo !== ""): ?>
+                <a class="button button-small button-secondary" href="manage_claims.php?status=<?= urlencode($claimFilter) ?>">Clear dates</a>
+            <?php endif; ?>
+        </form>
+        <?php if ($dateError !== ""): ?>
+            <p class="form-error" role="alert"><?= htmlspecialchars($dateError, ENT_QUOTES, "UTF-8") ?></p>
+        <?php endif; ?>
     </div>
 
     <?php if ($result && $result->num_rows > 0): ?>

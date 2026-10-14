@@ -117,6 +117,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 $selectColumns = [
     "claims.claim_id",
     "claims.claim_date",
+    "claims.reviewed_at",
     "claims.claim_status",
     "claims.decision_reason",
     "claims.item_id",
@@ -156,7 +157,7 @@ function myClaimsEscape($value): string
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>My Claims - Lost and Found</title>
-    <link rel="stylesheet" href="css/style.css?v=20261014">
+    <link rel="stylesheet" href="css/style.css?v=theme-20261014-10">
     <script src="navigation.js" defer></script>
 </head>
 <body>
@@ -173,6 +174,12 @@ function myClaimsEscape($value): string
                 <h2><?= myClaimsEscape($claim["item_name"]) ?></h2>
                 <p><strong>Status:</strong> <span class="claim-status claim-status-<?= myClaimsEscape($claim["claim_status"]) ?>"><?= myClaimsEscape(ucfirst($claim["claim_status"])) ?></span></p>
                 <p><strong>Submitted:</strong> <?= myClaimsEscape($claim["claim_date"]) ?></p>
+                <ol class="claim-timeline" aria-label="Claim timeline">
+                    <li><strong>Submitted</strong><time datetime="<?= myClaimsEscape(date(DATE_ATOM, strtotime($claim["claim_date"]))) ?>"><?= myClaimsEscape($claim["claim_date"]) ?></time></li>
+                    <?php if ($claim["reviewed_at"] !== null): ?>
+                        <li><strong><?= $claim["claim_status"] === "approved" ? "Approved" : ($claim["claim_status"] === "rejected" ? "Rejected" : "Reviewed") ?></strong><time datetime="<?= myClaimsEscape(date(DATE_ATOM, strtotime($claim["reviewed_at"]))) ?>"><?= myClaimsEscape($claim["reviewed_at"]) ?></time></li>
+                    <?php endif; ?>
+                </ol>
                 <?php if (trim((string) ($claim["decision_reason"] ?? "")) !== ""): ?>
                     <p class="feedback-banner"><strong>Administrator note:</strong> <?= nl2br(myClaimsEscape($claim["decision_reason"])) ?></p>
                 <?php endif; ?>
