@@ -4,6 +4,7 @@ require_once __DIR__ . "/session_bootstrap.php";
 require_once "db.php";
 require_once __DIR__ . "/account_guard.php";
 require_once __DIR__ . "/smart_assistant.php";
+require_once __DIR__ . "/assets/image_helper.php";
 enforceActiveAccount($conn);
 
 function escapeLikeValue(string $value): string
@@ -265,23 +266,19 @@ if (isset($_SESSION["user_id"])) {
     <?php elseif ($result && $result->num_rows > 0): ?>
         <div class="items-grid">
             <?php while ($item = $result->fetch_assoc()): ?>
-                <?php $safeImageName = basename((string) ($item["image"] ?? "")); ?>
 
-                <article class="item-card">
-                    <?php if ($safeImageName !== "" && $safeImageName !== "." && $safeImageName !== ".."): ?>
-                        <a class="item-thumbnail-link" href="item.php?item_id=<?= (int) $item["item_id"] ?>" aria-label="View <?= htmlspecialchars($item["item_name"], ENT_QUOTES, 'UTF-8') ?>">
-                            <img
-                                src="uploads/<?= htmlspecialchars($safeImageName, ENT_QUOTES, 'UTF-8') ?>"
-                                alt="<?= htmlspecialchars($item["item_name"], ENT_QUOTES, 'UTF-8') ?>"
-                                class="item-photo"
-                            >
-                        </a>
-                    <?php else: ?>
-                        <a class="item-thumbnail-link item-thumbnail-placeholder" href="item.php?item_id=<?= (int) $item["item_id"] ?>" aria-label="View <?= htmlspecialchars($item["item_name"], ENT_QUOTES, 'UTF-8') ?>">
-                            <span aria-hidden="true">No photo available</span>
-                        </a>
-                    <?php endif; ?>
+<?php $itemImageUrl = getItemImageUrl($item["image"] ?? null); ?>
 
+<article class="item-card">
+    <?php if ($itemImageUrl !== null): ?>
+        <a class="item-thumbnail-link" href="item.php?item_id=<?= (int) $item["item_id"] ?>" aria-label="View <?= htmlspecialchars($item["item_name"], ENT_QUOTES, 'UTF-8') ?>">
+            <img
+                src="<?= htmlspecialchars($itemImageUrl, ENT_QUOTES, 'UTF-8') ?>"
+                alt="<?= htmlspecialchars($item["item_name"], ENT_QUOTES, 'UTF-8') ?>"
+                class="item-photo"
+            >
+        </a>
+    <?php endif; ?>
                     <div class="item-body">
                         <h3><a class="item-title-link" href="item.php?item_id=<?= (int) $item["item_id"] ?>"><?= htmlspecialchars($item["item_name"]) ?></a></h3>
 

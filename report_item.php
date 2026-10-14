@@ -7,6 +7,7 @@ require_once __DIR__ . "/user_notifications.php";
 require_once __DIR__ . "/activity_log.php";
 require_once __DIR__ . "/smart_assistant.php";
 require_once __DIR__ . "/item_date_validation.php";
+require_once __DIR__ . "/vendor/autoload.php";
 enforceActiveAccount($conn);
 
 // Only logged-in users can report items.
@@ -119,16 +120,79 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             $existingImages->free();
                         }
                     }
-                    if ($uploadError === "") {
-                        $imageName = bin2hex(random_bytes(16)) . "." . $allowedTypes[$mimeType];
-                        $uploadDirectory = __DIR__ . DIRECTORY_SEPARATOR . "uploads";
-                        $uploadedPath = $uploadDirectory . DIRECTORY_SEPARATOR . $imageName;
-                        if (!is_dir($uploadDirectory)) {
-                            $uploadError = "The uploads folder does not exist.";
-                        } elseif (!move_uploaded_file($temporaryFile, $uploadedPath)) {
-                            $uploadError = "Unable to save the photo. Check the uploads folder.";
-                            $imageName = null;
-                            $uploadedPath = null;
+                    if ($uploadError === "")
+{
+$imageName = null;
+$uploadedPath = null;
+
+$cloudName = trim((string) getenv("CLOUDINARY_CLOUD_NAME"));
+$cloudKey = trim((string) getenv("CLOUDINARY_API_KEY"));
+$cloudSecret = trim((string) getenv("CLOUDINARY_API_SECRET"));
+
+$cloudinaryConfigured =
+    $cloudName !== "" ||
+    $cloudKey !== "" ||
+    $cloudSecret !== "";
+
+if ($cloudinaryConfigured) {
+
+    // If cloud storage is configured, require all three credentials.
+    if ($cloudName === "" || $cloudKey === "" || $cloudSecret === "") {
+        $uploadError = "Cloud photo storage is not fully configured.";
+    } else {
+        try {
+            \Cloudinary\Configuration\Configuration::instance([
+                "cloud" => [
+                    "cloud_name" => $cloudName,
+                    "api_key" => $cloudKey,
+                    "api_secret" => $cloudSecret
+                ],
+                "url" => [
+                    "secure" => true
+                ]
+            ]);
+
+            $uploadResult = (new \Cloudinary\Api\Upload\UploadApi())
+                ->upload($temporaryFile, [
+                    "folder" => "lost_found/items",
+                    "resource_type" => "image"
+                ]);
+
+            $cloudUrl = (string) ($uploadResult["secure_url"] ?? "");
+            $cloudUrlParts = parse_url($cloudUrl);
+
+            if (
+                ($cloudUrlParts["scheme"] ?? "") !== "https" ||
+                strtolower($cloudUrlParts["host"] ?? "") !== "res.cloudinary.com"
+            ) {
+                $uploadError = "Cloud photo storage returned an invalid image URL.";
+            } else {
+                $imageName = $cloudUrl;
+            }
+
+        } catch (\Throwable $e) {
+            error_log("Cloudinary item photo upload failed: " . $e->getMessage());
+            $uploadError = "Unable to store the photo online. Please try again.";
+        }
+    }
+
+} else {
+    // Local fallback for development on your laptop.
+    $imageName = bin2hex(random_bytes(16)) . "." . $allowedTypes[$mimeType];
+
+    $uploadDirectory = __DIR__ . DIRECTORY_SEPARATOR . "uploads";
+    $uploadedPath = $uploadDirectory . DIRECTORY_SEPARATOR . $imageName;
+
+    if (!is_dir($uploadDirectory)) {
+        $uploadError = "The uploads folder does not exist.";
+        $imageName = null;
+        $uploadedPath = null;
+    } elseif (!move_uploaded_file($temporaryFile, $uploadedPath)) {
+        $uploadError = "Unable to save the photo. Check the uploads folder.";
+        $imageName = null;
+        $uploadedPath = null;
+    }
+}
                         }
                     }
                 }
@@ -223,7 +287,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $stmt->close();
         }
     }
-}
 
 ?>
 <!DOCTYPE html>

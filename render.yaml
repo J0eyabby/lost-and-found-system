@@ -1,14 +1,15 @@
+
 services:
   - type: web
     name: lost-found
     runtime: docker
-    plan: starter
+    plan: free
     healthCheckPath: /api/index.php
     envVars:
       - key: DB_HOST
         sync: false
       - key: DB_PORT
-        value: "3306"
+        value: "23416"
       - key: DB_USERNAME
         sync: false
       - key: DB_PASSWORD
@@ -25,7 +26,9 @@ services:
         sync: false
       - key: MAIL_ENCRYPTION
         value: tls
-    disk:
-      name: lost-found-uploads
-      mountPath: /var/www/html/uploads
-      sizeGB: 1
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false

@@ -31,3 +31,5 @@
 .DS_Store
 Thumbs.db
 desktop.ini
+# Render configuration backup
+/render-backup.yaml
