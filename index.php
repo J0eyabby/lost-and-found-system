@@ -277,6 +277,10 @@ if (isset($_SESSION["user_id"])) {
                 class="item-photo"
             >
         </a>
+    <?php else: ?>
+        <a class="item-thumbnail-link item-thumbnail-placeholder" href="item.php?item_id=<?= (int) $item["item_id"] ?>" aria-label="View <?= htmlspecialchars($item["item_name"], ENT_QUOTES, 'UTF-8') ?>">
+            <span aria-hidden="true">No photo available</span>
+        </a>
     <?php endif; ?>
                     <div class="item-body">
                         <h3><a class="item-title-link" href="item.php?item_id=<?= (int) $item["item_id"] ?>"><?= htmlspecialchars($item["item_name"]) ?></a></h3>

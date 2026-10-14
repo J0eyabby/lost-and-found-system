@@ -5,6 +5,7 @@ require_once __DIR__ . "/account_guard.php";
 require_once __DIR__ . "/user_notifications.php";
 require_once __DIR__ . "/activity_log.php";
 require_once __DIR__ . "/smart_assistant.php";
+require_once __DIR__ . "/assets/image_helper.php";
 enforceActiveAccount($conn);
 
 $userId = (int) ($_SESSION["user_id"] ?? 0);
@@ -215,9 +216,13 @@ function myItemsEscape($value): string
         <div class="account-list">
         <?php while ($item = $items->fetch_assoc()): ?>
             <article class="account-card">
-                <?php $reportImage = basename((string) ($item["image"] ?? "")); ?>
-                <?php if ($reportImage !== "" && $reportImage !== "." && $reportImage !== ".."): ?>
-                    <img class="account-card-photo" src="uploads/<?= myItemsEscape($reportImage) ?>" alt="<?= myItemsEscape($item["item_name"]) ?>">
+                <?php $reportImageUrl = getItemImageUrl($item["image"] ?? null); ?>
+                <?php if ($reportImageUrl !== null): ?>
+                    <img class="account-card-photo" src="<?= myItemsEscape($reportImageUrl) ?>" alt="<?= myItemsEscape($item["item_name"]) ?>">
+                <?php else: ?>
+                    <div class="account-card-photo item-thumbnail-placeholder" role="img" aria-label="No photo available">
+                        <span>No photo available</span>
+                    </div>
                 <?php endif; ?>
                 <h2><?= myItemsEscape($item["item_name"]) ?></h2>
                 <p><strong>Type:</strong> <?= myItemsEscape(ucfirst($item["status"])) ?></p>

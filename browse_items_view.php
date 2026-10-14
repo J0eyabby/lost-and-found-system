@@ -3,6 +3,7 @@ require_once __DIR__ . "/session_bootstrap.php";
 require_once __DIR__ . "/db.php";
 require_once __DIR__ . "/account_guard.php";
 require_once __DIR__ . "/smart_assistant.php";
+require_once __DIR__ . "/assets/image_helper.php";
 enforceActiveAccount($conn);
 
 $userId = (int) ($_SESSION["user_id"] ?? 0);
@@ -130,13 +131,13 @@ if ($userId > 0) {
         <div class="items-grid">
             <?php while ($item = $items->fetch_assoc()): ?>
                 <?php
-                $imageName = basename((string) ($item["image"] ?? ""));
+                $imageUrl = getItemImageUrl($item["image"] ?? null);
                 $isOwner = $userId > 0 && $userId === (int) $item["user_id"];
                 ?>
                 <article class="item-card">
-                    <?php if ($imageName !== "" && $imageName !== "." && $imageName !== ".."): ?>
+                    <?php if ($imageUrl !== null): ?>
                         <a class="item-thumbnail-link" href="item.php?item_id=<?= (int) $item["item_id"] ?>" aria-label="View <?= htmlspecialchars($item["item_name"], ENT_QUOTES, "UTF-8") ?>">
-                            <img class="item-photo" src="uploads/<?= htmlspecialchars($imageName, ENT_QUOTES, "UTF-8") ?>" alt="<?= htmlspecialchars($item["item_name"], ENT_QUOTES, "UTF-8") ?>">
+                            <img class="item-photo" src="<?= htmlspecialchars($imageUrl, ENT_QUOTES, "UTF-8") ?>" alt="<?= htmlspecialchars($item["item_name"], ENT_QUOTES, "UTF-8") ?>">
                         </a>
                     <?php else: ?>
                         <a class="item-thumbnail-link item-thumbnail-placeholder" href="item.php?item_id=<?= (int) $item["item_id"] ?>" aria-label="View <?= htmlspecialchars($item["item_name"], ENT_QUOTES, "UTF-8") ?>">

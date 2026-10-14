@@ -5,6 +5,8 @@ require_once __DIR__ . "/account_guard.php";
 require_once __DIR__ . "/user_notifications.php";
 require_once __DIR__ . "/activity_log.php";
 require_once __DIR__ . "/item_date_validation.php";
+require_once __DIR__ . "/assets/image_helper.php";
+require_once __DIR__ . "/vendor/autoload.php";
 enforceActiveAccount($conn);
 
 if (!isset($_SESSION["user_id"])) {
@@ -64,7 +66,7 @@ $formCategory = $item["category"] ?? "";
 $formStatus = $item["status"];
 $formLocation = $item["location"] ?? "";
 $formDate = $item["date_lost_found"] ?? "";
-$currentImage = basename((string) ($item["image"] ?? ""));
+$currentImage = (string) ($item["image"] ?? "");
 $formOwnerHint = $item["owner_hint"] ?? "";
 $formHandoverContact = $item["private_handover_contact"] ?? "";
 $formHandoverLatitude = $item["private_handover_latitude"] ?? "";
@@ -104,7 +106,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             if ($deleteStmt->execute() && $deleteStmt->affected_rows === 1) {
                 recordActivity($conn, $user_id, $isAdminEditor ? "item_deleted_by_admin" : "item_deleted", "Item ID " . $item_id);
                 $uploadDirectory = __DIR__ . DIRECTORY_SEPARATOR . "uploads";
-                if ($currentImage !== "" && $currentImage !== "." && $currentImage !== "..") {
+                if (preg_match('/\A[a-f0-9]{32}\.(jpg|png|webp)\z/i', $currentImage)) {
                     $imagePath = $uploadDirectory . DIRECTORY_SEPARATOR . $currentImage;
                     if (is_file($imagePath)) {
                         unlink($imagePath);
@@ -170,16 +172,51 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 if (!isset($allowedTypes[$mimeType]) || getimagesize($temporaryFile) === false) {
                     $uploadError = "Please upload a valid JPG, PNG, or WebP image.";
                 } else {
-                    $newImageName = bin2hex(random_bytes(16)) . "." . $allowedTypes[$mimeType];
-                    $targetDir = __DIR__ . DIRECTORY_SEPARATOR . "uploads";
-                    $targetPath = $targetDir . DIRECTORY_SEPARATOR . $newImageName;
+                    $cloudName = trim((string) getenv("CLOUDINARY_CLOUD_NAME"));
+                    $cloudKey = trim((string) getenv("CLOUDINARY_API_KEY"));
+                    $cloudSecret = trim((string) getenv("CLOUDINARY_API_SECRET"));
+                    $cloudinaryConfigured = $cloudName !== "" || $cloudKey !== "" || $cloudSecret !== "";
 
-                    if (!is_dir($targetDir)) {
-                        $uploadError = "The uploads folder does not exist.";
-                    } elseif (!move_uploaded_file($temporaryFile, $targetPath)) {
-                        $uploadError = "Unable to save the photo. Check the uploads folder.";
+                    if ($cloudinaryConfigured && ($cloudName === "" || $cloudKey === "" || $cloudSecret === "")) {
+                        $uploadError = "Cloud photo storage is not fully configured.";
+                    } elseif ($cloudinaryConfigured) {
+                        try {
+                            \Cloudinary\Configuration\Configuration::instance([
+                                "cloud" => [
+                                    "cloud_name" => $cloudName,
+                                    "api_key" => $cloudKey,
+                                    "api_secret" => $cloudSecret
+                                ],
+                                "url" => ["secure" => true]
+                            ]);
+                            $uploadResult = (new \Cloudinary\Api\Upload\UploadApi())->upload($temporaryFile, [
+                                "folder" => "lost_found/items",
+                                "resource_type" => "image"
+                            ]);
+                            $cloudUrl = (string) ($uploadResult["secure_url"] ?? "");
+                            $cloudUrlParts = parse_url($cloudUrl);
+                            if (($cloudUrlParts["scheme"] ?? "") !== "https"
+                                || strtolower($cloudUrlParts["host"] ?? "") !== "res.cloudinary.com") {
+                                $uploadError = "Cloud photo storage returned an invalid image URL.";
+                            } else {
+                                $newImageName = $cloudUrl;
+                            }
+                        } catch (\Throwable $e) {
+                            error_log("Cloudinary item photo update failed: " . $e->getMessage());
+                            $uploadError = "Unable to store the photo online. Please try again.";
+                        }
                     } else {
-                        $uploadedPath = $targetPath;
+                        $newImageName = bin2hex(random_bytes(16)) . "." . $allowedTypes[$mimeType];
+                        $targetDir = __DIR__ . DIRECTORY_SEPARATOR . "uploads";
+                        $targetPath = $targetDir . DIRECTORY_SEPARATOR . $newImageName;
+
+                        if (!is_dir($targetDir)) {
+                            $uploadError = "The uploads folder does not exist.";
+                        } elseif (!move_uploaded_file($temporaryFile, $targetPath)) {
+                            $uploadError = "Unable to save the photo. Check the uploads folder.";
+                        } else {
+                            $uploadedPath = $targetPath;
+                        }
                     }
                 }
             }
@@ -219,7 +256,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $messageType = "success";
                 recordActivity($conn, $user_id, $isAdminEditor ? "item_updated_by_admin" : "item_updated", "Item ID " . $item_id);
                 notifyUsersAboutItem($conn, $itemOwnerId, $formItemName, $formCategory, $formLocation);
-                if ($uploadedPath !== null && $currentImage !== "" && $currentImage !== $newImageName) {
+                if ($uploadedPath !== null && preg_match('/\A[a-f0-9]{32}\.(jpg|png|webp)\z/i', $currentImage)) {
                     $oldImagePath = __DIR__ . DIRECTORY_SEPARATOR . "uploads" . DIRECTORY_SEPARATOR . $currentImage;
                     if (is_file($oldImagePath)) {
                         unlink($oldImagePath);
@@ -342,7 +379,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <div class="field-group full-width">
                     <label for="image">Replace photo</label>
                     <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp">
-                    <?php if ($currentImage !== ""): ?>
+                    <?php if (getItemImageUrl($currentImage) !== null): ?>
                         <p class="helper-text">Current photo: <?= htmlspecialchars($currentImage) ?></p>
                     <?php endif; ?>
                 </div>

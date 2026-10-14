@@ -2,6 +2,7 @@
 require_once __DIR__ . "/session_bootstrap.php";
 require_once __DIR__ . "/db.php";
 require_once __DIR__ . "/account_guard.php";
+require_once __DIR__ . "/assets/image_helper.php";
 enforceActiveAccount($conn);
 
 $itemId = filter_input(INPUT_GET, "item_id", FILTER_VALIDATE_INT);
@@ -47,12 +48,16 @@ function itemPageEscape($value): string
 <?php require __DIR__ . "/site_header.php"; ?>
 <main class="container item-detail-page">
     <article class="item-detail-card">
-        <?php $image = basename((string) ($item["image"] ?? "")); ?>
-        <?php if ($image !== "" && $image !== "." && $image !== ".."): ?>
-            <button class="item-detail-photo-button" type="button" data-zoom-photo="uploads/<?= itemPageEscape($image) ?>" data-zoom-alt="<?= itemPageEscape($item["item_name"]) ?>">
-                <img class="item-detail-photo" src="uploads/<?= itemPageEscape($image) ?>" alt="<?= itemPageEscape($item["item_name"]) ?>">
+        <?php $imageUrl = getItemImageUrl($item["image"] ?? null); ?>
+        <?php if ($imageUrl !== null): ?>
+            <button class="item-detail-photo-button" type="button" data-zoom-photo="<?= itemPageEscape($imageUrl) ?>" data-zoom-alt="<?= itemPageEscape($item["item_name"]) ?>">
+                <img class="item-detail-photo" src="<?= itemPageEscape($imageUrl) ?>" alt="<?= itemPageEscape($item["item_name"]) ?>">
                 <span>Tap to zoom photo</span>
             </button>
+        <?php else: ?>
+            <div class="item-detail-photo item-thumbnail-placeholder" role="img" aria-label="No photo available">
+                <span>No photo available</span>
+            </div>
         <?php endif; ?>
         <div class="item-detail-content">
             <p class="eyebrow">Shared community listing</p>
@@ -81,7 +86,7 @@ function itemPageEscape($value): string
             <p class="share-feedback helper-text" aria-live="polite"></p>
         </div>
     </article>
-    <?php if ($image !== "" && $image !== "." && $image !== ".."): ?>
+    <?php if ($imageUrl !== null): ?>
         <dialog class="photo-zoom-dialog" data-photo-zoom-dialog aria-label="Item photo viewer">
             <div class="photo-zoom-toolbar">
                 <button type="button" class="button button-small button-secondary" data-zoom-out aria-label="Zoom out">âˆ’</button>

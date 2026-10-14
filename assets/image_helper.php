@@ -37,5 +37,11 @@ function getItemImageUrl(?string $image): ?string
         return null;
     }
 
+    $localPath = __DIR__ . DIRECTORY_SEPARATOR . ".."
+        . DIRECTORY_SEPARATOR . "uploads" . DIRECTORY_SEPARATOR . $image;
+    if (!is_file($localPath)) {
+        return null;
+    }
+
     return "uploads/" . rawurlencode($image);
 }
