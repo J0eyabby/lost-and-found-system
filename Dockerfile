@@ -1,8 +1,7 @@
 FROM php:8.2-apache
 
-
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends unzip \
+    && apt-get install -y --no-install-recommends unzip libzip-dev \
     && docker-php-ext-install mysqli zip \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
