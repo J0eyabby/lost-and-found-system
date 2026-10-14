@@ -78,7 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <main class="auth-container">
     <h1>Login</h1>
     <p>Sign in to your account.</p>
-    <p class="helper-text">Youâ€™ll stay signed in on this device unless you log out.</p>
+    <p class="helper-text">You&rsquo;ll stay signed in on this device unless you log out.</p>
 
     <?php if ($notice !== ""): ?>
         <p class="feedback-banner success" role="status"><?= htmlspecialchars($notice) ?></p>
