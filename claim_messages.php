@@ -95,7 +95,7 @@ function claimMessagesEscape($value): string
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Private Handover Messages</title>
-    <link rel="stylesheet" href="css/style.css?v=20261013">
+    <link rel="stylesheet" href="css/style.css?v=20261014">
 </head>
 <body>
 <?php require __DIR__ . "/site_header.php"; ?>

@@ -3184,6 +3184,130 @@ html[data-theme="dark"] textarea {
     background-color: rgba(24, 40, 36, 0.96);
 }
 
+/* Keep page surfaces transparent so the shared background remains visible. */
+:root {
+    --glass-surface: transparent;
+    --glass-surface-strong: transparent;
+    --glass-border: rgba(157, 232, 255, 0.2);
+}
+
+.site-header,
+.site-footer,
+.search-panel,
+.item-card,
+.item-detail-card,
+.auth-container,
+.form-container,
+.account-card,
+.notification-card,
+.settings-card,
+.settings-menu,
+.settings-admin-menu,
+.admin-panel,
+.dashboard-section,
+.dashboard-hero,
+.admin-page-header,
+.dashboard-links,
+.dashboard-card,
+.returned-card,
+.profile-details-card,
+.legal-heading,
+.legal-content,
+.help-card,
+.help-support {
+    color: #fff;
+    background: var(--glass-surface);
+    border-color: var(--glass-border);
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+.site-header {
+    background: transparent;
+}
+
+.site-footer {
+    border-top-color: var(--glass-border);
+}
+
+.hub-grid,
+.settings-menu,
+.settings-admin-menu,
+.settings-grid,
+.settings-admin-links {
+    overflow: hidden;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.hub-card,
+.settings-menu li,
+.settings-admin-links a,
+.settings-card,
+.settings-grid .settings-card {
+    color: #fff;
+    background: var(--glass-surface);
+    border-color: var(--glass-border);
+}
+
+.hub-card:hover,
+.settings-menu a:hover,
+.settings-admin-links a:hover {
+    background: transparent;
+}
+
+.settings-menu .settings-menu-group {
+    color: #fff;
+    background: var(--glass-surface-strong);
+    border-color: var(--glass-border);
+}
+
+.hub-card strong,
+.hub-card small,
+.settings-menu strong,
+.settings-menu span,
+.settings-admin-links strong,
+.settings-admin-links span,
+.settings-card h1,
+.settings-card h2,
+.settings-card h3,
+.settings-card p,
+.settings-card label,
+.admin-panel h1,
+.admin-panel h2,
+.admin-panel h3,
+.admin-panel p,
+.admin-panel label,
+.dashboard-section h1,
+.dashboard-section h2,
+.dashboard-section h3,
+.dashboard-section p,
+.dashboard-section label {
+    color: #fff !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.78);
+}
+
+.settings-card .checkbox-label,
+.settings-notifications li,
+.private-claim-details {
+    color: #fff;
+    background: transparent;
+    border-color: var(--glass-border);
+}
+
+.dashboard-preview-card {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    box-shadow: none;
+}
+
+html[data-theme="dark"] {
+    --glass-surface: transparent;
+    --glass-surface-strong: transparent;
+    --glass-border: rgba(157, 232, 255, 0.24);
+}
+
 html[data-theme="dark"] table,
 html[data-theme="dark"] .claims-table {
     color: var(--text);
@@ -4231,4 +4355,113 @@ main table :is(h1, h2, h3, h4, p, label, legend, small, strong, dt, dd, figcapti
     .home-content .search-form .search-submit {
         width: 100%;
     }
+}
+
+/* Final surface reset: panels and list rows stay fully transparent. */
+.site-header,
+.site-footer,
+.search-panel,
+.item-card,
+.item-detail-card,
+.auth-container,
+.form-container,
+.account-card,
+.notification-card,
+.settings-card,
+.settings-grid,
+.settings-menu,
+.settings-menu li,
+.settings-menu-group,
+.settings-admin-menu,
+.settings-admin-links,
+.settings-admin-links a,
+.admin-panel,
+.dashboard-section,
+.dashboard-hero,
+.admin-page-header,
+.dashboard-links,
+.dashboard-card,
+.dashboard-summary-card,
+.dashboard-preview-card,
+.returned-card,
+.profile-details-card,
+.legal-heading,
+.legal-content,
+.help-card,
+.help-support,
+.claims-table,
+.claims-table tbody,
+.claims-table tbody tr,
+.claims-table tbody td,
+.private-claim-details,
+.settings-card .checkbox-label,
+.settings-notifications li {
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+.hub-grid {
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.hub-card:hover,
+.settings-menu a:hover,
+.settings-admin-links a:hover,
+.dashboard-summary-card:hover,
+.dashboard-summary-card:focus-visible,
+.admin-theme a.dashboard-card:hover {
+    background: transparent !important;
+}
+
+/* Settings use grouped dark panels while the surrounding page stays transparent. */
+.settings-menu,
+.settings-admin-menu,
+.settings-grid,
+.settings-dialog.is-modal,
+.settings-dialog-header,
+.settings-dialog .settings-card,
+.settings-card,
+.settings-admin-links,
+.settings-admin-links a,
+.settings-notifications li,
+.settings-card .checkbox-label {
+    color: #fff;
+    background: rgba(15, 34, 32, 0.78) !important;
+    border-color: rgba(157, 232, 255, 0.22);
+}
+
+.settings-menu-group {
+    color: #fff;
+    background: rgba(15, 34, 32, 0.9) !important;
+    border-color: rgba(157, 232, 255, 0.22);
+}
+
+.settings-menu a:hover,
+.settings-admin-links a:hover {
+    background: rgba(117, 216, 255, 0.14) !important;
+}
+
+html[data-theme="dark"] .settings-menu,
+html[data-theme="dark"] .settings-admin-menu,
+html[data-theme="dark"] .settings-grid,
+html[data-theme="dark"] .settings-dialog.is-modal,
+html[data-theme="dark"] .settings-dialog-header,
+html[data-theme="dark"] .settings-dialog .settings-card,
+html[data-theme="dark"] .settings-card,
+html[data-theme="dark"] .settings-admin-links,
+html[data-theme="dark"] .settings-admin-links a,
+html[data-theme="dark"] .settings-notifications li,
+html[data-theme="dark"] .settings-card .checkbox-label {
+    background: rgba(20, 35, 32, 0.82) !important;
+}
+
+.site-brand {
+    color: #75d8ff !important;
+    font-weight: 900;
+}
+
+.site-brand:hover {
+    color: #a4e8ff !important;
 }
