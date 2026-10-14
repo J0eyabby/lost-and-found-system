@@ -87,14 +87,16 @@ $siteProfilePhoto = basename((string) $siteProfilePhoto);
 <header class="site-header">
     <div class="site-header-inner">
         <nav class="site-header-actions" aria-label="Quick navigation" data-i18n-aria="quick_navigation">
-            <a class="site-icon-link" href="<?= $onDashboard ? "index.php" : "dashboard.php" ?>"
-               aria-label="<?= $onDashboard ? "Close dashboard" : "Open dashboard" ?>"
-               title="<?= $onDashboard ? "Close dashboard" : "Dashboard" ?>"
-               data-i18n-aria="<?= $onDashboard ? "close_dashboard" : "dashboard" ?>">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </a>
+            <?php if ($siteUserId > 0): ?>
+                <a class="site-icon-link" href="<?= $onDashboard ? "index.php" : "dashboard.php" ?>"
+                   aria-label="<?= $onDashboard ? "Close dashboard" : "Open dashboard" ?>"
+                   title="<?= $onDashboard ? "Close dashboard" : "Dashboard" ?>"
+                   data-i18n-aria="<?= $onDashboard ? "close_dashboard" : "dashboard" ?>">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </a>
+            <?php endif; ?>
             <?php if (!$onHomePage): ?>
                 <a class="site-icon-link site-back-link" href="index.php" data-history-back
                    aria-label="Go to previous page" title="Go to previous page">
@@ -165,12 +167,25 @@ $siteProfilePhoto = basename((string) $siteProfilePhoto);
                     </div>
                 </div>
             <?php else: ?>
-                <a class="site-profile-link" href="login.php" aria-label="Log in" title="Log in">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="8" r="3.4"></circle>
-                        <path d="M5.2 20c.5-3.5 3.1-5.5 6.8-5.5s6.3 2 6.8 5.5"></path>
-                    </svg>
-                </a>
+                <div class="site-icon-control">
+                    <button class="site-profile-link site-icon-button" type="button"
+                            aria-label="Open account menu" title="Log in or register"
+                            aria-expanded="false" aria-controls="profile-menu"
+                            data-profile-menu-toggle>
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="12" cy="8" r="3.4"></circle>
+                            <path d="M5.2 20c.5-3.5 3.1-5.5 6.8-5.5s6.3 2 6.8 5.5"></path>
+                        </svg>
+                    </button>
+                    <div class="profile-menu" id="profile-menu" hidden>
+                        <div class="profile-menu-summary">
+                            <span class="profile-menu-avatar" aria-hidden="true">?</span>
+                            <span><strong>Welcome</strong><small>Access your account</small></span>
+                        </div>
+                        <a class="profile-menu-link" href="login.php">Log in</a>
+                        <a class="profile-menu-link" href="register.php">Create account</a>
+                    </div>
+                </div>
             <?php endif; ?>
         </div>
     </div>

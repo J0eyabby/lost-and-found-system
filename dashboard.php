@@ -5,6 +5,11 @@ require_once __DIR__ . "/account_guard.php";
 enforceActiveAccount($conn);
 
 $userId = (int) ($_SESSION["user_id"] ?? 0);
+if ($userId < 1) {
+    header("Location: login.php?next=" . rawurlencode("dashboard.php"));
+    exit;
+}
+
 $role = "";
 $reportCount = 0;
 $claimCount = 0;
