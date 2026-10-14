@@ -4,6 +4,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends unzip libzip-dev \
     && docker-php-ext-install mysqli zip \
     && a2enmod rewrite \
+    && printf "upload_max_filesize=10M\npost_max_size=12M\nmax_file_uploads=5\n" > /usr/local/etc/php/conf.d/uploads.ini \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer

@@ -151,12 +151,12 @@
             <p>If you have questions about these terms, need assistance with a claim, want to report suspicious activity, or wish to make a privacy request, contact the website administrator.</p>
             <p>Use the links below to reach the relevant section directly:</p>
             <ul class="legal-links">
-                <li><a href="settings.php#help-support"><strong>Contact Support</strong></a> â€” ask a question or request assistance.</li>
-                <li><a href="login.php?next=report_item.php"><strong>Report an Item</strong></a> â€” submit a lost or found item report.</li>
-                <li><a href="index.php"><strong>Browse Items</strong></a> â€” view available item listings.</li>
-                <li><a href="login.php"><strong>Login</strong></a> â€” access your account.</li>
-                <li><a href="register.php"><strong>Register</strong></a> â€” create an account.</li>
-                <li><a href="https://www.odpc.go.ke/"><strong>Data Protection Commissioner, Kenya</strong></a> â€” learn about data protection and privacy rights.</li>
+                <li><a href="settings.php#help-support"><strong>Contact Support</strong></a> — ask a question or request assistance.</li>
+                <li><a href="login.php?next=report_item.php"><strong>Report an Item</strong></a> — submit a lost or found item report.</li>
+                <li><a href="index.php"><strong>Browse Items</strong></a> — view available item listings.</li>
+                <li><a href="login.php"><strong>Login</strong></a> — access your account.</li>
+                <li><a href="register.php"><strong>Register</strong></a> — create an account.</li>
+                <li><a href="https://www.odpc.go.ke/"><strong>Data Protection Commissioner, Kenya</strong></a> — learn about data protection and privacy rights.</li>
             </ul>
             <?php if (!empty($siteContactEmail)): ?>
                 <p>Site contact: <a href="mailto:<?= htmlspecialchars($siteContactEmail, ENT_QUOTES, "UTF-8") ?>"><?= htmlspecialchars($siteContactEmail, ENT_QUOTES, "UTF-8") ?></a></p>

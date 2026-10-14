@@ -259,7 +259,7 @@ function myItemsEscape($value): string
                     <?php if ($possibleMatches !== []): ?>
                         <section class="smart-match-panel" aria-label="Possible item matches">
                             <h3><?= $assistantLanguage === "sw" ? "Huenda ikawa imefanana" : "Possible matches" ?></h3>
-                            <p class="helper-text"><?= $assistantLanguage === "sw" ? "Mapendekezo ya ndani yanayotegemea maandishi; si uthibitisho wa umiliki." : "Private, on-site text-based suggestionsâ€”not proof of ownership." ?></p>
+                            <p class="helper-text"><?= $assistantLanguage === "sw" ? "Mapendekezo ya ndani yanayotegemea maandishi; si uthibitisho wa umiliki." : "Private, on-site text-based suggestions—not proof of ownership." ?></p>
                             <?php foreach ($possibleMatches as $possibleMatch): ?>
                                 <?php $candidate = $possibleMatch["item"]; $analysis = $possibleMatch["analysis"]; ?>
                                 <?php $matchKey = (int) $item["item_id"] . ":" . (int) $candidate["item_id"]; $savedFeedback = $matchFeedback[$matchKey] ?? ""; ?>

@@ -121,7 +121,7 @@ try {
 <?php require __DIR__ . "/site_header.php"; ?>
 <main class="auth-container">
     <h1>Forgot Password</h1>
-    <p>Enter your account email and weâ€™ll send a password reset link if it matches an account.</p>
+    <p>Enter your account email and we’ll send a password reset link if it matches an account.</p>
 
     <?php if ($message !== ""): ?>
         <p class="feedback-banner <?= htmlspecialchars($messageType) ?>" role="<?= $messageType === "success" ? "status" : "alert" ?>">

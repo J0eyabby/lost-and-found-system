@@ -22,8 +22,8 @@ if ($userId > 0) {
 $languages = [
     "en" => "English",
     "sw" => "Kiswahili",
-    "fr" => "FranÃ§ais",
-    "ar" => "Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©",
+    "fr" => "Français",
+    "ar" => "العربية",
 ];
 $message = "";
 $messageType = "error";
@@ -492,7 +492,7 @@ function settingsEscape($value): string
                     <?php endif; ?>
                     <button class="button button-small" type="submit" data-i18n="save_profile">Save Profile</button>
                 </form>
-                <p><a href="profile.php#email-address" data-i18n="change_email">Change email</a> Â· <a href="profile.php#account-security" data-i18n="change_password">Change password</a></p>
+                <p><a href="profile.php#email-address" data-i18n="change_email">Change email</a> · <a href="profile.php#account-security" data-i18n="change_password">Change password</a></p>
             <?php else: ?>
                 <p data-i18n="login_profile_settings">Log in to view and manage your profile settings.</p>
                 <a class="button button-small" href="login.php" data-i18n="login">Log in</a>

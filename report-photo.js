@@ -3,13 +3,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const browseInput = document.querySelector("#image");
     const preview = document.querySelector("[data-photo-preview]");
     const nameLabel = document.querySelector("[data-photo-name]");
-    if (!cameraInput || !browseInput || !preview || !nameLabel) {
+    if ((!cameraInput && !browseInput) || !preview || !nameLabel) {
         return;
     }
 
     let previewUrl = "";
     const updateSelection = (selectedInput, otherInput) => {
-        otherInput.value = "";
+        if (otherInput) {
+            otherInput.value = "";
+        }
         const file = selectedInput.files?.[0];
         if (previewUrl) {
             URL.revokeObjectURL(previewUrl);
@@ -33,6 +35,10 @@ document.addEventListener("DOMContentLoaded", () => {
         nameLabel.textContent = `${file.name} selected.`;
     };
 
-    cameraInput.addEventListener("change", () => updateSelection(cameraInput, browseInput));
-    browseInput.addEventListener("change", () => updateSelection(browseInput, cameraInput));
+    if (cameraInput) {
+        cameraInput.addEventListener("change", () => updateSelection(cameraInput, browseInput));
+    }
+    if (browseInput) {
+        browseInput.addEventListener("change", () => updateSelection(browseInput, cameraInput));
+    }
 });

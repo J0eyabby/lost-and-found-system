@@ -325,10 +325,10 @@ $result = $claimsQuery->get_result();
                         </td>
                         <td data-label="Latest response">
                             <?php if ($claim["claim_status"] === "pending" && $claim["reviewed_at"] !== null): ?>
-                                <strong>Claimant responded â€” review required</strong><br>
+                                <strong>Claimant responded — review required</strong><br>
                                 <small><?= htmlspecialchars($claim["reviewed_at"]) ?></small>
                             <?php else: ?>
-                                â€”
+                                —
                             <?php endif; ?>
                         </td>
                         <td data-label="Decision / request details"><?= nl2br(htmlspecialchars($claim["decision_reason"] ?? "", ENT_QUOTES, "UTF-8")) ?></td>

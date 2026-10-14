@@ -174,7 +174,7 @@ $result = $conn->query(
             <ul class="settings-activity-list">
                 <?php while ($feedbackRow = $recentFeedbackResult->fetch_assoc()): ?>
                     <li>
-                        <strong><?= (int) $feedbackRow["rating"] ?>/5 Â· <?= htmlspecialchars($feedbackRow["item_name"]) ?></strong>
+                        <strong><?= (int) $feedbackRow["rating"] ?>/5 · <?= htmlspecialchars($feedbackRow["item_name"]) ?></strong>
                         <span>From <?= htmlspecialchars($feedbackRow["full_name"]) ?><?= trim((string) $feedbackRow["message"]) !== "" ? ": " . htmlspecialchars($feedbackRow["message"]) : "" ?></span>
                         <time datetime="<?= htmlspecialchars(date(DATE_ATOM, strtotime($feedbackRow["created_at"]))) ?>"><?= htmlspecialchars($feedbackRow["created_at"]) ?></time>
                     </li>

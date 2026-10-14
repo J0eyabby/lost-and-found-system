@@ -7,6 +7,14 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     $isSecureRequest = (!empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off")
         || $forwardedProtocol === "https"
         || (is_array($cloudflareVisitor) && ($cloudflareVisitor["scheme"] ?? "") === "https");
+    $isProduction = strtolower((string) getenv("APP_ENV")) === "production"
+        || strtolower((string) getenv("RENDER")) === "true";
+
+    if ($isProduction && !$isSecureRequest) {
+        $requestUri = (string) ($_SERVER["REQUEST_URI"] ?? "/");
+        header("Location: https://" . ($_SERVER["HTTP_HOST"] ?? "") . $requestUri, true, 301);
+        exit;
+    }
 
     ini_set("session.gc_maxlifetime", (string) $lifetime);
     ini_set("session.use_strict_mode", "1");
@@ -14,10 +22,13 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
         "lifetime" => $lifetime,
         "path" => $cookie["path"],
         "domain" => $cookie["domain"],
-        "secure" => $isSecureRequest,
+        "secure" => $isProduction || $isSecureRequest,
         "httponly" => true,
         "samesite" => "Lax",
     ];
+    if ($isProduction && $isSecureRequest) {
+        header("Strict-Transport-Security: max-age=31536000; includeSubDomains");
+    }
     session_set_cookie_params($sessionCookieOptions);
     session_start();
     if (isset($_COOKIE[session_name()]) && hash_equals((string) $_COOKIE[session_name()], session_id())) {
@@ -25,7 +36,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
             "expires" => time() + $lifetime,
             "path" => $cookie["path"],
             "domain" => $cookie["domain"],
-            "secure" => $isSecureRequest,
+            "secure" => $isProduction || $isSecureRequest,
             "httponly" => true,
             "samesite" => "Lax",
         ]);

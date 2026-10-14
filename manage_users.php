@@ -157,7 +157,7 @@ $result = $conn->query($sql);
                             <?= htmlspecialchars($user["role"]) ?>
                         </td>
                         <td><?= (int) $user["is_active"] ? "Active" : "Suspended" ?></td>
-                        <td><?= (int) $user["is_active"] ? "â€”" : htmlspecialchars($user["suspension_reason"] ?? "Reason not recorded", ENT_QUOTES, "UTF-8") ?></td>
+                        <td><?= (int) $user["is_active"] ? "—" : htmlspecialchars($user["suspension_reason"] ?? "Reason not recorded", ENT_QUOTES, "UTF-8") ?></td>
 
                         <td>
                             <?= htmlspecialchars($user["created_at"]) ?>
@@ -176,7 +176,7 @@ $result = $conn->query($sql);
                                         <button class="button button-small button-secondary" type="submit">Reactivate</button>
                                     <?php endif; ?>
                                 </form>
-                            <?php else: ?>â€”<?php endif; ?>
+                            <?php else: ?>—<?php endif; ?>
                         </td>
                     </tr>
                 <?php endwhile; ?>

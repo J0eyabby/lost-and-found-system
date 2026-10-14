@@ -30,10 +30,20 @@ $owner_hint = "";
 $handoverContact = "";
 $handoverLatitude = "";
 $handoverLongitude = "";
+$reportCsrfToken = $_SESSION["report_csrf_token"] ?? "";
+if (!is_string($reportCsrfToken) || $reportCsrfToken === "") {
+    $reportCsrfToken = bin2hex(random_bytes(32));
+    $_SESSION["report_csrf_token"] = $reportCsrfToken;
+}
 $categoryOptionsResult = $conn->query("SELECT name FROM item_categories WHERE is_active = 1 ORDER BY name");
 $categoryOptions = $categoryOptionsResult->fetch_all(MYSQLI_ASSOC);
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+if (
+    $_SERVER["REQUEST_METHOD"] === "POST"
+    && (!is_string($_POST["csrf_token"] ?? "") || !hash_equals($reportCsrfToken, $_POST["csrf_token"]))
+) {
+    $message = "Your session expired. Refresh the page and try again.";
+} elseif ($_SERVER["REQUEST_METHOD"] === "POST") {
     $item_name = trim($_POST["item_name"] ?? "");
     $description = trim($_POST["description"] ?? "");
     $category = trim($_POST["category"] ?? "");
@@ -79,9 +89,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if ($imageUpload !== null && $imageUpload["error"] !== UPLOAD_ERR_NO_FILE) {
 
             if ($imageUpload["error"] !== UPLOAD_ERR_OK) {
-                $uploadError = "The photo could not be uploaded.";
-            } elseif ($imageUpload["size"] > 5 * 1024 * 1024) {
-                $uploadError = "The photo must be 5 MB or smaller.";
+                error_log("Item photo upload rejected before processing; upload error code: " . (int) $imageUpload["error"]);
+                $uploadError = match ((int) $imageUpload["error"]) {
+                    UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => "The photo is too large for this server. Please use a photo smaller than 10 MB.",
+                    UPLOAD_ERR_PARTIAL => "The photo upload was interrupted. Please try again.",
+                    UPLOAD_ERR_NO_TMP_DIR, UPLOAD_ERR_CANT_WRITE, UPLOAD_ERR_EXTENSION => "The server could not save the uploaded photo. Please try again later.",
+                    default => "The photo could not be uploaded. Please try again.",
+                };
+            } elseif ($imageUpload["size"] > 10 * 1024 * 1024) {
+                $uploadError = "The photo must be 10 MB or smaller.";
             } else {
                 $temporaryFile = $imageUpload["tmp_name"];
 
@@ -98,7 +114,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     !isset($allowedTypes[$mimeType]) ||
                     getimagesize($temporaryFile) === false
                 ) {
-                    $uploadError = "Please upload a valid JPG, PNG, or WebP image.";
+                    $uploadError = in_array($mimeType, ["image/heic", "image/heif"], true)
+                        ? "HEIC and HEIF photos are not supported yet. Please choose JPEG, PNG, or WebP, or change your phone camera format to Most Compatible."
+                        : "Please upload a valid JPG, PNG, or WebP image.";
                 } else {
                     $photoHash = hash_file("sha256", $temporaryFile);
                     if ($photoHash === false) {
@@ -170,7 +188,7 @@ if ($cloudinaryConfigured) {
             }
 
         } catch (\Throwable $e) {
-            error_log("Cloudinary item photo upload failed: " . $e->getMessage());
+            error_log("Cloudinary item photo upload failed: " . get_class($e));
             $uploadError = "Unable to store the photo online. Please try again.";
         }
     }
@@ -311,6 +329,7 @@ if ($cloudinaryConfigured) {
     <?php endif; ?>
 
     <form method="POST" action="report_item.php" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($reportCsrfToken, ENT_QUOTES, "UTF-8") ?>">
        <label for="item_name">Item Name *</label><br>
         <input
             type="text"
@@ -328,7 +347,7 @@ if ($cloudinaryConfigured) {
         type="file"
         id="image_camera"
         name="image_camera"
-        accept="image/jpeg,image/png,image/webp"
+        accept="image/*"
         capture="environment"
     >
     <label class="button button-small button-secondary" for="image_camera">Take a photo</label>

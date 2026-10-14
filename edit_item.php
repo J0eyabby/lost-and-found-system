@@ -154,13 +154,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $uploadedPath = null;
         $uploadError = "";
 
-        if (isset($_FILES["image"]) && $_FILES["image"]["error"] !== UPLOAD_ERR_NO_FILE) {
-            if ($_FILES["image"]["error"] !== UPLOAD_ERR_OK) {
-                $uploadError = "The photo could not be uploaded.";
-            } elseif ($_FILES["image"]["size"] > 5 * 1024 * 1024) {
-                $uploadError = "The photo must be 5 MB or smaller.";
+        $imageUpload = isset($_FILES["image_camera"])
+            && $_FILES["image_camera"]["error"] !== UPLOAD_ERR_NO_FILE
+            ? $_FILES["image_camera"]
+            : ($_FILES["image"] ?? null);
+        if ($imageUpload !== null && $imageUpload["error"] !== UPLOAD_ERR_NO_FILE) {
+            if ($imageUpload["error"] !== UPLOAD_ERR_OK) {
+                error_log("Item replacement upload rejected before processing; upload error code: " . (int) $imageUpload["error"]);
+                $uploadError = match ((int) $imageUpload["error"]) {
+                    UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => "The photo is too large for this server. Please use a photo smaller than 10 MB.",
+                    UPLOAD_ERR_PARTIAL => "The photo upload was interrupted. Please try again.",
+                    UPLOAD_ERR_NO_TMP_DIR, UPLOAD_ERR_CANT_WRITE, UPLOAD_ERR_EXTENSION => "The server could not save the uploaded photo. Please try again later.",
+                    default => "The photo could not be uploaded. Please try again.",
+                };
+            } elseif ($imageUpload["size"] > 10 * 1024 * 1024) {
+                $uploadError = "The photo must be 10 MB or smaller.";
             } else {
-                $temporaryFile = $_FILES["image"]["tmp_name"];
+                $temporaryFile = $imageUpload["tmp_name"];
                 $finfo = new finfo(FILEINFO_MIME_TYPE);
                 $mimeType = $finfo->file($temporaryFile);
                 $allowedTypes = [
@@ -170,7 +180,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 ];
 
                 if (!isset($allowedTypes[$mimeType]) || getimagesize($temporaryFile) === false) {
-                    $uploadError = "Please upload a valid JPG, PNG, or WebP image.";
+                    $uploadError = in_array($mimeType, ["image/heic", "image/heif"], true)
+                        ? "HEIC and HEIF photos are not supported yet. Please choose JPEG, PNG, or WebP, or change your phone camera format to Most Compatible."
+                        : "Please upload a valid JPG, PNG, or WebP image.";
                 } else {
                     $cloudName = trim((string) getenv("CLOUDINARY_CLOUD_NAME"));
                     $cloudKey = trim((string) getenv("CLOUDINARY_API_KEY"));
@@ -202,7 +214,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 $newImageName = $cloudUrl;
                             }
                         } catch (\Throwable $e) {
-                            error_log("Cloudinary item photo update failed: " . $e->getMessage());
+                            error_log("Cloudinary item photo update failed: " . get_class($e));
                             $uploadError = "Unable to store the photo online. Please try again.";
                         }
                     } else {
@@ -294,6 +306,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <link rel="stylesheet" href="css/style.css?v=20261014">
     <script src="navigation.js" defer></script>
     <script src="handover-location.js" defer></script>
+    <script src="report-photo.js" defer></script>
 </head>
 <body>
 <?php require __DIR__ . "/site_header.php"; ?>
@@ -373,14 +386,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <div class="field-group full-width">
                     <label for="owner_hint">Private ownership clue</label>
                     <textarea id="owner_hint" name="owner_hint" rows="3" maxlength="2000" required aria-describedby="owner-hint-help"><?= htmlspecialchars($formOwnerHint) ?></textarea>
-                    <p id="owner-hint-help" class="helper-text">Only claimants, you, and administrators can access this clue and the claimantâ€™s answer. It is never shown on public listings.</p>
+                    <p id="owner-hint-help" class="helper-text">Only claimants, you, and administrators can access this clue and the claimant’s answer. It is never shown on public listings.</p>
                 </div>
 
-                <div class="field-group full-width">
-                    <label for="image">Replace photo</label>
-                    <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp">
+                <div class="field-group full-width report-photo-picker">
+                    <fieldset>
+                        <legend>Replace photo</legend>
+                        <input class="report-photo-input" type="file" id="image_camera" name="image_camera" accept="image/*" capture="environment">
+                        <label class="button button-small button-secondary" for="image_camera">Take a photo</label>
+                        <input class="report-photo-input" type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp">
+                        <label class="button button-small button-secondary" for="image">Browse photos</label>
+                        <p class="helper-text" data-photo-name aria-live="polite">Choose a replacement photo or take one with your camera.</p>
+                        <img class="report-photo-preview" data-photo-preview alt="Replacement photo preview" hidden>
+                    </fieldset>
                     <?php if (getItemImageUrl($currentImage) !== null): ?>
-                        <p class="helper-text">Current photo: <?= htmlspecialchars($currentImage) ?></p>
+                        <p class="helper-text">Current photo:</p>
+                        <img class="report-photo-preview" src="<?= htmlspecialchars((string) getItemImageUrl($currentImage), ENT_QUOTES, "UTF-8") ?>" alt="Current item photo">
                     <?php endif; ?>
                 </div>
 
