@@ -228,7 +228,7 @@ $result = $claimsQuery->get_result();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Claims</title>
 
-<link rel="stylesheet" href="css/style.css?v=theme-20261014-10">
+<link rel="stylesheet" href="css/style.css?v=theme-20261014-12">
 <script src="navigation.js" defer></script>
 <script src="date-range.js" defer></script>
 

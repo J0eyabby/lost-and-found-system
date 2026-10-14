@@ -90,7 +90,7 @@ if ($userId > 0) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($browseTitle) ?> - Lost and Found</title>
-    <link rel="stylesheet" href="css/style.css?v=theme-20261014-10">
+    <link rel="stylesheet" href="css/style.css?v=theme-20261014-12">
     <script src="date-range.js" defer></script>
 </head>
 <body>

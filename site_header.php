@@ -80,7 +80,9 @@ if ($siteSettingsQuery) {
 $siteLogo = trim($siteLogo);
 $siteProfilePhoto = basename((string) $siteProfilePhoto);
 ?>
-<script>document.documentElement.dataset.theme = "dark";</script>
+
+<script>document.documentElement.dataset.theme = <?= json_encode($siteTheme, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;</script>
+
 <header class="site-header">
     <div class="site-header-inner">
         <nav class="site-header-actions" aria-label="Quick navigation" data-i18n-aria="quick_navigation">

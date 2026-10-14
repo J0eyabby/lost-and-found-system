@@ -151,7 +151,7 @@ function claimEscape($value): string
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Claim Found Item</title>
-    <link rel="stylesheet" href="css/style.css?v=theme-20261014-10">
+    <link rel="stylesheet" href="css/style.css?v=theme-20261014-12">
     <script src="navigation.js" defer></script>
 </head>
 <body>

@@ -71,7 +71,7 @@ function siteSettingsEscape($value): string
 ?>
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Website Settings</title><link rel="stylesheet" href="css/style.css?v=theme-20261014-10"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Website Settings</title><link rel="stylesheet" href="css/style.css?v=theme-20261014-12"></head>
 <body><?php require __DIR__ . "/site_header.php"; ?>
 <main class="container account-page">
     <h1 class="page-title">Website Settings</h1>

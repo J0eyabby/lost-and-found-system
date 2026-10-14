@@ -136,7 +136,7 @@ if (isset($_SESSION["user_id"])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lost and Found System</title>
-    <link rel="stylesheet" href="css/style.css?v=theme-20261014-10">
+    <link rel="stylesheet" href="css/style.css?v=theme-20261014-12">
     <script src="navigation.js" defer></script>
     <script src="date-range.js" defer></script>
 </head>

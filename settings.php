@@ -239,7 +239,7 @@ function settingsEscape($value): string
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Settings - Lost and Found</title>
-    <link rel="stylesheet" href="css/style.css?v=theme-20261014-10">
+    <link rel="stylesheet" href="css/style.css?v=theme-20261014-12">
 </head>
 <body data-settings-panel="<?= settingsEscape($activeSettingsPanel) ?>">
 <?php require __DIR__ . "/site_header.php"; ?>
