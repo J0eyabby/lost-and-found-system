@@ -5067,3 +5067,20 @@ header:not(.site-header) {
     background-image: none !important;
     background-color: rgba(10, 24, 39, 0.86) !important;
 }
+
+/* Keep the homepage profile photo button perfectly circular */
+.site-profile-link {
+    border-radius: 50% !important;
+    overflow: hidden;
+    padding: 0;
+    aspect-ratio: 1 / 1;
+}
+
+.site-profile-link img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center;
+}
