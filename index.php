@@ -249,7 +249,7 @@ if (isset($_SESSION["user_id"])) {
                 </form>
             </section>
 
-            <section>
+             <section id="item-results"> 
             <div class="section-header">
                 <h2>Recently Reported Items</h2>
             </div>
@@ -372,6 +372,19 @@ if (isset($_SESSION["user_id"])) {
     }
     $conn->close();
     ?>
+    <?php if ($filtersActive): ?>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const results = document.getElementById("item-results");
 
+                if (results) {
+                    results.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start"
+                    });
+                }
+            });
+        </script>
+    <?php endif; ?>
 </body>
 </html>
