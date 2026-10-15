@@ -147,7 +147,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $decisionLabel = $new_status === "needs_info" ? "More information requested" : "Claim " . $new_status;
                 $message = $decisionLabel . " successfully.";
                 addUserNotification($conn, (int) $claimantId, "claims", $decisionLabel . " for " . $itemName . ($decisionReason !== "" ? ": " . $decisionReason : "."));
-                if (userAllowsEmailNotification($conn, (int) $claimantId, "claims") && !sendCustomerNotification(
+                if (
+    is_string($claimantEmail) &&
+    $claimantEmail !== "" &&
+    userAllowsEmailNotification($conn, (int) $claimantId, "claims") &&
+    !sendCustomerNotification(
                     $claimantEmail,
                     $decisionLabel . " for your claim",
                     $decisionLabel . " for your claim on \"{$itemName}\". " . ($decisionReason !== "" ? $decisionReason . " " : "") . "Sign in to view your claim status."
