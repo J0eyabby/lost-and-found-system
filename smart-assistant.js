@@ -77,7 +77,9 @@ document.addEventListener("DOMContentLoaded", () => {
         assistantFeedback.textContent = possibleEmail || possiblePhone || possibleSecret ? text.possibleContact : text.moderation;
     });
 
-    if (document.querySelector(".site-header")) {
+    const currentPage = window.location.pathname.split("/").pop();
+    const isAuthPage = currentPage === "login.php" || currentPage === "register.php";
+    if (document.querySelector(".site-header") && !isAuthPage) {
         const help = document.createElement("aside");
         help.className = "local-help-assistant";
         const toggle = document.createElement("button");

@@ -16,7 +16,8 @@ if ($userId < 1) {
 if (empty($_SESSION["lifecycle_csrf_token"])) {
     $_SESSION["lifecycle_csrf_token"] = bin2hex(random_bytes(32));
 }
-$message = "";
+$message = $_SESSION["my_items_notice"] ?? "";
+unset($_SESSION["my_items_notice"]);
 $hasReporterConsentColumn = dbHasColumn($conn, "items", "reporter_return_consent");
 $hasClaimantConsentColumn = dbHasColumn($conn, "claims", "claimant_return_consent");
 

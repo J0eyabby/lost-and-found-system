@@ -89,8 +89,8 @@ if (!$clearFilters && $dateFrom !== "") {
     $queryValues[] = $dateFrom;
 }
 
-$sql .= " ORDER BY items.created_at DESC";
-$sql .= " LIMIT 24";
+$sql .= " ORDER BY items.created_at DESC, items.item_id DESC";
+$sql .= " LIMIT 3";
 
 $stmt = $conn->prepare($sql);
 $result = null;
@@ -170,6 +170,7 @@ if (isset($_SESSION["user_id"])) {
                     <?php else: ?>
                         <a class="button button-secondary home-secondary-action" href="login.php?next=report_item.php">Report an Item</a>
                     <?php endif; ?>
+                    <a class="button button-secondary home-secondary-action" href="all_items.php">Browse All Items</a>
                 </div>
             </div>
         </section>

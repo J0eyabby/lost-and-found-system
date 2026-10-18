@@ -282,17 +282,9 @@ if ($cloudinaryConfigured) {
                     recordActivity($conn, (int) $user_id, "possible_duplicate_photo", "Item ID " . $newItemId);
                 }
                 notifyUsersAboutItem($conn, (int) $user_id, $item_name, $category, $location);
-
-                $item_name = "";
-                $description = "";
-                $category = "";
-                $status = "";
-                $location = "";
-                $date_lost_found = "";
-                $owner_hint = "";
-                $handoverContact = "";
-                $handoverLatitude = "";
-                $handoverLongitude = "";
+                $_SESSION["my_items_notice"] = "Item reported successfully!";
+                header("Location: my_items.php");
+                exit;
             } else {
                 if ($uploadedPath !== null && file_exists($uploadedPath)) {
                     unlink($uploadedPath);

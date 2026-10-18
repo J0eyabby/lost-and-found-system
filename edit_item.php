@@ -283,6 +283,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $item["image"] = $newImageName;
                 $item["owner_hint"] = $formOwnerHint;
                 $currentImage = $newImageName;
+                $_SESSION["my_items_notice"] = "Item details edited successfully.";
+                header("Location: my_items.php");
+                exit;
             } else {
                 $message = "Unable to update the item right now.";
                 $messageType = "error";
