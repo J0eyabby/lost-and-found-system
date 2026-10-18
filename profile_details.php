@@ -23,7 +23,7 @@ if (!$query->fetch()) {
 }
 $query->close();
 $photo = basename((string) $photo);
-function profileDetailsEscape($value): string
+function profileDetailsEscape(mixed $value): string
 {
     return htmlspecialchars((string) $value, ENT_QUOTES, "UTF-8");
 }
@@ -43,14 +43,19 @@ function profileDetailsEscape($value): string
     <h1 class="page-title">My Profile</h1>
     <section class="profile-details-card">
         <div class="profile-details-heading">
-            <?php if ($photo !== ""): ?>
+           <?php if (
+             is_string($photo) &&
+             $photo !== "" &&
+             is_file(__DIR__ . "/uploads/profiles/" . basename($photo))
+): ?>
                 <img class="profile-details-photo" src="uploads/profiles/<?= profileDetailsEscape($photo) ?>" alt="Profile photo">
             <?php else: ?>
                 <span class="profile-details-photo profile-menu-avatar" aria-hidden="true"><?= profileDetailsEscape(strtoupper(substr($fullName, 0, 1))) ?></span>
             <?php endif; ?>
             <div>
                 <h2><?= profileDetailsEscape($fullName) ?></h2>
-                <p>Member since <?= profileDetailsEscape(date("F Y", strtotime($createdAt))) ?></p>
+                <p>Member since <?= profileDetailsEscape(
+    date("F Y", strtotime(is_string($createdAt) ? $createdAt : "now"))) ?></p>
             </div>
         </div>
         <dl class="profile-details-list">

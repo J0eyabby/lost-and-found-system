@@ -316,7 +316,7 @@ if ($cloudinaryConfigured) {
     <script src="navigation.js" defer></script>
     <script src="handover-location.js" defer></script>
     <script src="report-photo.js" defer></script>
-
+    
 </head>
 <body>
 <?php require __DIR__ . "/site_header.php"; ?>
@@ -441,14 +441,16 @@ if ($cloudinaryConfigured) {
             </fieldset>
         </section>
 
-        <label for="location">Location</label><br>
-        <input
-            type="text"
-            id="location"
-            name="location"
-            maxlength="150"
-            value="<?= htmlspecialchars($location) ?>"
-        ><br><br>
+<label for="location">Location</label><br>
+
+<input
+    type="text"
+    id="location"
+    name="location"
+    maxlength="150"
+    value="<?= htmlspecialchars($location, ENT_QUOTES, 'UTF-8') ?>"
+    placeholder="Enter a location where the item was lost or found"
+><br><br>
 
         <label for="date_lost_found">Date Lost or Found</label><br>
         <input

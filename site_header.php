@@ -96,15 +96,7 @@ $siteProfilePhoto = basename((string) $siteProfilePhoto);
                     </svg>
                 </a>
             <?php endif; ?>
-            <?php if (!$onHomePage): ?>
-                <a class="site-icon-link site-back-link" href="index.php" data-history-back
-                   aria-label="Go to previous page" title="Go to previous page">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M19 12H5"></path>
-                        <path d="m11 18-6-6 6-6"></path>
-                    </svg>
-                </a>
-            <?php endif; ?>
+
         </nav>
         <a class="site-brand" href="index.php">
             <img class="site-brand-logo"
@@ -138,7 +130,10 @@ $siteProfilePhoto = basename((string) $siteProfilePhoto);
                             aria-label="Open profile menu" title="Profile"
                             aria-expanded="false" aria-controls="profile-menu"
                             data-profile-menu-toggle>
-                        <?php if ($siteProfilePhoto !== ""): ?>
+                        <?php if (
+    $siteProfilePhoto !== "" &&
+    is_file(__DIR__ . "/uploads/profiles/" . $siteProfilePhoto)
+): ?>
                             <img src="uploads/profiles/<?= htmlspecialchars($siteProfilePhoto, ENT_QUOTES, "UTF-8") ?>" alt="">
                         <?php else: ?>
                             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -149,11 +144,17 @@ $siteProfilePhoto = basename((string) $siteProfilePhoto);
                     </button>
                     <div class="profile-menu" id="profile-menu" hidden>
                         <div class="profile-menu-summary">
-                            <?php if ($siteProfilePhoto !== ""): ?>
-                                <img src="uploads/profiles/<?= htmlspecialchars($siteProfilePhoto, ENT_QUOTES, "UTF-8") ?>" alt="">
-                            <?php else: ?>
-                                <span class="profile-menu-avatar" aria-hidden="true"><?= htmlspecialchars(strtoupper(substr($siteFullName !== "" ? $siteFullName : "U", 0, 1)), ENT_QUOTES, "UTF-8") ?></span>
-                            <?php endif; ?>
+                            
+<?php if (
+    $siteProfilePhoto !== "" &&
+    is_file(__DIR__ . "/uploads/profiles/" . $siteProfilePhoto)
+): ?>
+    <img src="uploads/profiles/<?= htmlspecialchars($siteProfilePhoto, ENT_QUOTES, "UTF-8") ?>" alt="">
+<?php else: ?>
+    <span class="profile-menu-avatar" aria-hidden="true">
+        <?= htmlspecialchars(strtoupper(substr($siteFullName !== "" ? $siteFullName : "U", 0, 1)), ENT_QUOTES, "UTF-8") ?>
+    </span>
+<?php endif; ?>
                             <span>
                                 <strong><?= htmlspecialchars($siteFullName, ENT_QUOTES, "UTF-8") ?></strong>
                                 <small><?= htmlspecialchars($siteEmail, ENT_QUOTES, "UTF-8") ?></small>
@@ -188,9 +189,27 @@ $siteProfilePhoto = basename((string) $siteProfilePhoto);
             <?php endif; ?>
         </div>
     </div>
-</header>
+
+<?php
+$currentPage = basename($_SERVER['PHP_SELF']);
+$showPreviousButton = !in_array($currentPage, [
+    'index.php',
+    'login.php',
+    'register.php'
+], true);
+?>
+
+<?php if ($showPreviousButton): ?>
+    <a
+        class="previous-page-x"
+        href="<?= htmlspecialchars($siteUserId > 0 ? 'dashboard.php' : 'index.php', ENT_QUOTES, 'UTF-8') ?>"
+        data-history-back
+        aria-label="Return to previous page"
+        title="Return to previous page">&times;</a>
+<?php endif; ?>
+
 <script>document.documentElement.lang = <?= json_encode($siteLanguage, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;</script>
 <script src="language.js" defer></script>
-<script src="site-header.js?v=theme-20261014" defer></script>
+<script src="site-header.js?v=scroll-20261017" defer></script>
 <script src="password-visibility.js" defer></script>
 <script src="smart-assistant.js?v=chat-20261013" defer></script>

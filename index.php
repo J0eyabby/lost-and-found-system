@@ -12,12 +12,13 @@ function escapeLikeValue(string $value): string
     return str_replace(["\\", "%", "_"], ["\\\\", "\\%", "\\_"], $value);
 }
 
-// Get the search term and selected status
+ // Get the search term and selected status
+$clearFilters = isset($_GET["clear_filters"]) && $_GET["clear_filters"] === "1";
 $search = trim($_GET["search"] ?? "");
-$status = $_GET["status"] ?? "all";
-$category = trim($_GET["category"] ?? "");
-$location = trim($_GET["location"] ?? "");
-$dateFrom = trim($_GET["date_from"] ?? "");
+$status = $clearFilters ? "all" : ($_GET["status"] ?? "all");
+$category = $clearFilters ? "" : trim($_GET["category"] ?? "");
+$location = $clearFilters ? "" : trim($_GET["location"] ?? "");
+$dateFrom = $clearFilters ? "" : trim($_GET["date_from"] ?? "");
 $dateError = "";
 
 // Accept only valid filter options
@@ -50,7 +51,11 @@ $sql = "SELECT items.item_id, items.item_name,
         FROM items
         INNER JOIN users ON items.user_id = users.user_id
         WHERE items.resolved_at IS NULL AND items.is_hidden = 0";
-$searchTerms = array_slice(smartAssistantTokens($search), 0, 8);
+
+$searchTerms = $clearFilters
+    ? []
+    : array_slice(smartAssistantTokens($search), 0, 8);
+
 $queryValues = [];
 foreach ($searchTerms as $term) {
     $sql .= " AND (items.item_name LIKE ? OR items.description LIKE ?
@@ -59,22 +64,27 @@ foreach ($searchTerms as $term) {
     array_push($queryValues, $likeTerm, $likeTerm, $likeTerm, $likeTerm);
 }
 
-if ($status !== "all") {
+if (!$clearFilters && $status !== "all") {
     $sql .= " AND items.status = ?";
     $queryValues[] = $status;
 }
 
-$filtersActive = $search !== "" || $status !== "all" || $category !== ""
-    || $location !== "" || $dateFrom !== "";
-if ($category !== "") {
+$filtersActive = !$clearFilters && (
+    $search !== "" || $status !== "all" || $category !== ""
+    || $location !== "" || $dateFrom !== ""
+);
+
+if (!$clearFilters && $category !== "") {
     $sql .= " AND items.category = ?";
     $queryValues[] = $category;
 }
-if ($location !== "") {
+
+if (!$clearFilters && $location !== "") {
     $sql .= " AND items.location LIKE ?";
     $queryValues[] = "%" . escapeLikeValue($location) . "%";
 }
-if ($dateFrom !== "") {
+
+if (!$clearFilters && $dateFrom !== "") {
     $sql .= " AND items.date_lost_found >= ?";
     $queryValues[] = $dateFrom;
 }
@@ -175,16 +185,34 @@ if (isset($_SESSION["user_id"])) {
 
                 <!-- Search and filter form -->
                 <form method="GET" action="index.php" class="search-form">
-                <div class="field-group">
-                    <label class="visually-hidden" for="search">Search by name, description, category, or location</label>
-                    <input
-                        type="search"
-                        id="search"
-                        name="search"
-                        placeholder="Search items"
-                        value="<?= htmlspecialchars($search) ?>"
-                    >
-                </div>
+                
+<div class="field-group search-field-group">
+    <label class="visually-hidden" for="search">Search by name, description, category, or location</label>
+    <div class="search-input-wrap">
+        <input
+            type="search"
+            id="search"
+            name="search"
+            placeholder="Search items"
+            value="<?= htmlspecialchars($search) ?>"
+        >
+        <button class="search-submit" type="submit" aria-label="Search items" title="Search">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="10.8" cy="10.8" r="6.3"></circle>
+                <path d="m15.5 15.5 5 5"></path>
+            </svg>
+        </button>
+</div>
+</div>
+<div class="field-group">
+    <label for="date_from">Filter by date</label>
+    <input
+        type="date"
+        id="date_from"
+        name="date_from"
+        value="<?= htmlspecialchars($dateFrom, ENT_QUOTES, 'UTF-8') ?>"
+    >
+</div>
 
                 <div class="field-group">
                     <label class="visually-hidden" for="status">Filter by status</label>
@@ -219,33 +247,55 @@ if (isset($_SESSION["user_id"])) {
                     </select>
                 </div>
 
-                <div class="field-group">
-                    <label class="visually-hidden" for="location">Filter by location</label>
-                    <input type="search" id="location" name="location"
-                        placeholder="Location" value="<?= htmlspecialchars($location) ?>">
-                </div>
+<div class="field-group">
+    <label class="visually-hidden" for="location">Filter by location</label>
 
-                <div class="field-group date-filter-group">
-                    <label for="date-from">Incident date from</label>
-                    <input type="date" id="date-from" name="date_from"
-                        max="<?= date("Y-m-d") ?>" value="<?= htmlspecialchars($dateFrom) ?>">
-                </div>
+    <input
+        type="search"
+        id="location"
+        name="location"
+        placeholder="Enter a location where the item was lost or found"
+        value="<?= htmlspecialchars($location, ENT_QUOTES, 'UTF-8') ?>"
+    >
+</div>
+
+
 
                 <?php if ($dateError !== ""): ?>
                     <p class="form-error full-width" role="alert"><?= htmlspecialchars($dateError, ENT_QUOTES, "UTF-8") ?></p>
-                <?php endif; ?>
+                <?php endif; ?>               
 
-                <div class="search-actions">
-                    <button class="search-submit" type="submit" aria-label="Search items" title="Search">
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <circle cx="10.8" cy="10.8" r="6.3"></circle>
-                            <path d="m15.5 15.5 5 5"></path>
-                        </svg>
-                    </button>
-                </div>
-                <?php if ($filtersActive): ?>
-                    <a href="index.php" class="clear-link">Clear filters</a>
-                <?php endif; ?>
+
+
+
+
+
+<button
+    type="button"
+    class="clear-link"
+    id="clear-filters-button">
+    Clear filters
+</button>
+
+
+
+<script>
+document.getElementById("clear-filters-button").addEventListener("click", function () {
+    const searchInput = document.getElementById("search");
+    const searchText = searchInput ? searchInput.value : "";
+
+    const url = new URL(window.location.href);
+
+    url.search = "";
+    url.searchParams.set("clear_filters", "1");
+    url.searchParams.set("search", searchText);
+
+    window.location.href = url.toString();
+});
+</script>
+
+
+
                 </form>
             </section>
 
@@ -372,19 +422,6 @@ if (isset($_SESSION["user_id"])) {
     }
     $conn->close();
     ?>
-    <?php if ($filtersActive): ?>
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const results = document.getElementById("item-results");
 
-                if (results) {
-                    results.scrollIntoView({
-                        behavior: "smooth",
-                        block: "start"
-                    });
-                }
-            });
-        </script>
-    <?php endif; ?>
 </body>
 </html>

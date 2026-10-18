@@ -216,14 +216,19 @@ html[data-theme="dark"] .admin-theme .dashboard-section {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex: 0 0 42px;
     width: 42px;
     height: 42px;
-    object-fit: cover;
-    color: #183d3b;
-    background: #e8f2ef;
+    box-sizing: border-box;
+    border: 1px solid #475569;
     border-radius: 50%;
-    font-weight: 800;
+    background: #1e293b;
+    color: #f1f5f9;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1;
 }
+
 
 .profile-menu-summary strong,
 .profile-menu-summary small {
@@ -419,15 +424,18 @@ header h1 {
 }
 
 .profile-avatar {
-    display: inline-flex;
+    display: block;
     flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
     width: 38px;
     height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    aspect-ratio: 1 / 1;
     border: 2px solid rgba(255, 255, 255, 0.8);
     border-radius: 50%;
     object-fit: cover;
+    object-position: center;
+    overflow: hidden;
 }
 
 .profile-avatar-placeholder {
@@ -485,10 +493,12 @@ main.container {
 
 .search-form {
     display: grid;
-    grid-template-columns: minmax(120px, 320px) minmax(130px, 175px) 44px auto;
+    grid-template-columns: minmax(0, 1fr) minmax(110px, 150px) minmax(130px, 180px);
     gap: 10px;
-    align-items: center;
-    max-width: 590px;
+    align-items: end;
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
 }
 
 .field-group {
@@ -685,9 +695,14 @@ button:hover,
 }
 
 .clear-link {
+    display: inline-block;
     color: var(--accent);
     font-weight: 700;
-    text-decoration: none;
+    text-decoration: underline;
+    padding: 10px 0;
+    cursor: pointer;
+    visibility: visible;
+    opacity: 1;
 }
 
 .clear-link:hover {
@@ -812,9 +827,12 @@ textarea {
     font-size: 1rem;
 }
 
+
 /* Admin tables */
 table {
     width: 100%;
+    max-width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     background: white;
     margin: 20px 0;
@@ -822,12 +840,27 @@ table {
     overflow: hidden;
 }
 
+
 th,
 td {
-    padding: 13px 14px;
+    padding: 8px 10px;
     border: 1px solid var(--border);
     text-align: left;
+    vertical-align: middle;
+    font-size: 13px;
+    line-height: 1.4;
+    overflow-wrap: break-word;
+    word-break: normal;
 }
+
+th {
+    background: var(--primary);
+    color: white;
+    font-size: 12px;
+    line-height: 1.3;
+    letter-spacing: 0.2px;
+}
+
 
 th {
     background: var(--primary);
@@ -856,10 +889,12 @@ tr:nth-child(even) {
         flex-wrap: wrap;
     }
 
-    .search-form {
-        grid-template-columns: minmax(100px, 1fr) 100px 44px;
-        max-width: none;
-    }
+
+.search-form {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: none;
+    width: 100%;
+}
 
     .search-form .clear-link {
         grid-column: 1 / -1;
@@ -1553,7 +1588,7 @@ tr:nth-child(even) {
 .private-claim-details {
     margin: 16px 0;
     padding: 14px;
-    background: #f2f6fb;
+    background: #264770;
     border-left: 4px solid var(--accent);
     border-radius: 8px;
 }
@@ -1722,18 +1757,28 @@ html[lang="ar"] .site-header-inner {
 }
 
 .site-profile-link {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    box-sizing: border-box;
     padding: 0;
     overflow: hidden;
-    background: #deece7;
-    border: 2px solid #176b63;
+    border-radius: 10px !important;
+    background: #f0f7f5;
+border: 1px solid #d2e4df;
+    flex: 0 0 38px;
 }
 
 .site-profile-link img {
+    display: block;
     width: 100%;
     height: 100%;
+    min-width: 0;
+    min-height: 0;
     object-fit: cover;
+    object-position: center;
+    border-radius: 50%;
 }
 
 .site-profile-link svg {
@@ -3310,7 +3355,7 @@ html[data-theme="dark"] textarea {
 .settings-card .checkbox-label,
 .settings-notifications li,
 .private-claim-details {
-    color: #fff;
+    color: #300b88;
     background: transparent;
     border-color: var(--glass-border);
 }
@@ -4308,13 +4353,13 @@ main table :is(h1, h2, h3, h4, p, label, legend, small, strong, dt, dd, figcapti
 
 /* Keep account detail panels on the same dark surface as the dashboards. */
 .private-claim-details {
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(96, 5, 133, 0.9);
     background: rgba(22, 54, 52, 0.86);
     border-left-color: #75d8ff;
 }
 
 .private-claim-details :is(h3, p, strong, small, label) {
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(38, 17, 77, 0.9);
 }
 
 .profile-menu {
@@ -5068,19 +5113,295 @@ header:not(.site-header) {
     background-color: rgba(10, 24, 39, 0.86) !important;
 }
 
-/* Keep the homepage profile photo button perfectly circular */
+
+/* Keep the homepage profile button the same size as notification */
 .site-profile-link {
-    border-radius: 50% !important;
+    color: #f1f5f9 !important;
+    background: #1e293b !important;
+    border: 1px solid #475569 !important;
+    border-radius: 10px !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px;
+    min-height: 38px;
+    box-sizing: border-box;
+    flex: 0 0 38px;
+    padding: 0 !important;
     overflow: hidden;
-    padding: 0;
-    aspect-ratio: 1 / 1;
+
 }
 
 .site-profile-link img {
     display: block;
     width: 100%;
     height: 100%;
-    border-radius: 50%;
+    min-width: 0;
+    min-height: 0;
     object-fit: cover;
     object-position: center;
+    border-radius: inherit;
+}
+
+/* Match the notification icon's stroke */
+.site-profile-link svg {
+    color: #f1f5f9 !important;
+    stroke: currentColor !important;
+    fill: none !important;
+    width: 21px;
+    height: 21px;
+    stroke-width: 1.8;
+}
+
+/* Keep the Show Password button stationary inside the input */
+.password-field .password-visibility-toggle {
+    transform: translateY(-50%) !important;
+    translate: none !important;
+    top: 50% !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.password-field .password-visibility-toggle:hover,
+.password-field .password-visibility-toggle:active,
+.password-field .password-visibility-toggle:focus {
+    transform: translateY(-50%) !important;
+    translate: none !important;
+    top: 50% !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Search input: keep the icon inside the field */
+.home-content .search-field-group {
+    min-width: 0;
+    width: 100%;
+}
+
+.home-content .search-input-wrap {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+}
+
+.home-content .search-input-wrap input[type="search"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding-right: 54px;
+}
+
+.home-content .search-input-wrap .search-submit {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    min-width: 40px;
+    height: 36px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+/* Make calendar icons visible throughout the app */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: brightness(0) invert(1);
+    opacity: 1;
+    cursor: pointer;
+}
+
+/* Make Find an Item section span the full screen */
+.home-page > .home-content {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 30px 0 0;
+    box-sizing: border-box;
+}
+
+/* Mobile-only manual date entry */
+.date-manual-input {
+    width: 100%;
+    min-height: 42px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font: inherit;
+}
+
+@media (max-width: 760px) {
+    .date-manual-input:not([hidden]) {
+        display: block;
+    }
+}
+
+/* Align header icons on the same horizontal baseline */
+.site-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Give notification and profile controls identical dimensions */
+.site-header-right .site-icon-link,
+.site-header-right .site-profile-link {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0;
+}
+
+/* Keep the profile wrapper aligned with the notification button */
+.site-header-right .site-icon-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+}
+
+/* Prevent the header profile photo from stretching */
+.site-header-right .site-profile-link img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    object-fit: cover;
+    object-position: center;
+    border-radius: inherit;
+}
+
+
+/* Fix readability of private handover details on both forms */
+.handover-fields,
+.private-handover-details {
+    color: #243746;
+    text-shadow: none;
+}
+
+.handover-fields h2,
+.private-handover-details h2,
+.handover-fields p,
+.private-handover-details p,
+.handover-fields label,
+.private-handover-details label,
+.handover-fields legend,
+.private-handover-details legend {
+    color: #243746;
+    text-shadow: none;
+}
+
+/* Keep form fields readable */
+.handover-fields textarea,
+.handover-fields input,
+.private-handover-details textarea,
+.private-handover-details input {
+    color: #243746;
+    background-color: #1f0a58;
+    border: 1px solid #237ea8;
+    text-shadow: none;
+}
+
+.handover-fields textarea::placeholder,
+.private-handover-details textarea::placeholder {
+    color: #64748b;
+    opacity: 1;
+}
+
+/* Keep the location button text readable */
+.handover-fields .button,
+.private-handover-details .button {
+    text-shadow: none;
+}
+
+/* Fix private handover section readability */
+main .handover-fields :is(h1, h2, h3, h4, p, label, legend, small, strong, dt, dd, figcaption, summary),
+main .private-handover-details :is(h1, h2, h3, h4, p, label, legend, small, strong, dt, dd, figcaption, summary) {
+    color: #243746 !important;
+    text-shadow: none !important;
+}
+
+/* Make handover form controls readable */
+main .handover-fields :is(input, textarea, select),
+main .private-handover-details :is(input, textarea, select) {
+    color: #243746 !important;
+    background-color: #f3ecec !important;
+    text-shadow: none !important;
+}
+
+main .handover-fields textarea::placeholder,
+main .private-handover-details textarea::placeholder {
+    color: #64748b !important;
+    opacity: 1;
+}
+
+
+/* Previous-page X button outside the header */
+.previous-page-x {
+    position: fixed;
+    top: 82px;
+    right: 6%;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 10px;
+    background: rgba(16, 36, 58, 0.95);
+    color: #fff;
+    font-size: 25px;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+@media (max-width: 720px) {
+    .previous-page-x {
+        top: 92px;
+        right: 5%;
+    }
+}
+
+.previous-page-x:hover {
+    background: rgba(15, 118, 110, 0.95);
+    color: #fff;
+}
+
+/* Center hero content on PC only */
+@media (min-width: 768px) {
+    .home-hero-content {
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        transform: translateY(-3cm);
+    }
+
+    .home-hero h1,
+    .home-hero-subtitle {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .home-hero-actions {
+        justify-content: center;
+    }
+}
+
+/* Move hero content upwards on phones only */
+@media (max-width: 767px) {
+    .home-hero-content {
+        transform: translateY(-2cm);
+    }
 }
