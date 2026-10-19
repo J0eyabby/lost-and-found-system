@@ -169,7 +169,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $newPassword = $_POST["new_password"] ?? "";
         $confirmPassword = $_POST["confirm_password"] ?? "";
 
-        if (!password_verify($currentPassword, $passwordHash)) {
+       if (!is_string($passwordHash) || !password_verify($currentPassword, $passwordHash)) {
             $message = "Your current password is incorrect.";
         } elseif (!profilePasswordIsValid($newPassword)) {
             $message = "Password must be at least 8 characters and include an uppercase letter, a number, and a special character.";
@@ -192,11 +192,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $newEmail = trim($_POST["new_email"] ?? "");
         $currentPassword = $_POST["email_current_password"] ?? "";
 
-        if (!password_verify($currentPassword, $passwordHash)) {
+        if (!is_string($passwordHash) || !password_verify($currentPassword, $passwordHash)) {
             $message = "Your current password is incorrect.";
         } elseif (!filter_var($newEmail, FILTER_VALIDATE_EMAIL) || strlen($newEmail) > 100) {
             $message = "Enter a valid email address of up to 100 characters.";
-        } elseif (strcasecmp($newEmail, $email) === 0) {
+        } elseif (is_string($newEmail) && is_string($email) && strcasecmp($newEmail, $email) === 0) {
             $message = "That is already your current email address.";
         } else {
             $existsStmt = $conn->prepare("SELECT user_id FROM users WHERE email = ? AND user_id <> ? LIMIT 1");
@@ -306,7 +306,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </div>
             <div class="field-group">
                 <label for="email_display">Current email</label>
-                <input type="email" id="email_display" value="<?= htmlspecialchars($email) ?>" readonly>
+               <input type="email" id="email_display" value="<?= htmlspecialchars($email ?? '') ?>" readonly>
                 <p class="helper-text">Change and verify your address below.</p>
             </div>
             <div class="field-group">

@@ -194,7 +194,7 @@ html[data-theme="dark"] .admin-theme .dashboard-section {
     background: #fff;
     border: 1px solid var(--border);
     border-radius: 16px;
-    box-shadow: 0 18px 44px rgba(24, 61, 59, 0.2);
+    box-shadow: 0 18px 44px rgba(10, 253, 241, 0.877);
 }
 
 .profile-menu.is-open {
@@ -250,7 +250,7 @@ html[data-theme="dark"] .admin-theme .dashboard-section {
 
 .profile-menu-link:hover {
     color: var(--primary);
-    background: #eef5f3;
+    background: #f4f6f7;
 }
 
 .profile-menu-separator {
@@ -260,7 +260,7 @@ html[data-theme="dark"] .admin-theme .dashboard-section {
 }
 
 .profile-menu-link-logout {
-    color: #a32c3c;
+    color: #a32c3c !important;
     font-weight: 750;
 }
 
@@ -1190,7 +1190,7 @@ tr:nth-child(even) {
 }
 
 .dashboard-links a:hover {
-    background: #10564f;
+    background: #5beedf;
 }
 
 .dashboard-section {
@@ -4370,7 +4370,7 @@ main table :is(h1, h2, h3, h4, p, label, legend, small, strong, dt, dd, figcapti
 
 .profile-menu a:hover,
 .profile-menu button:hover {
-    background: rgba(117, 216, 255, 0.16);
+    background: rgba(85, 197, 241, 0.945);
 
     .home-hero {
         min-height: 520px;
