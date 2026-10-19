@@ -2,95 +2,19 @@
 require_once __DIR__ . "/session_bootstrap.php";
 require_once "db.php";
 require_once __DIR__ . "/account_guard.php";
-require_once __DIR__ . "/smart_assistant.php";
 require_once __DIR__ . "/assets/image_helper.php";
-require_once __DIR__ . "/item_date_validation.php";
 enforceActiveAccount($conn);
 
-function escapeLikeValue(string $value): string
-{
-    return str_replace(["\\", "%", "_"], ["\\\\", "\\%", "\\_"], $value);
-}
-
- // Get the search term and selected status
-$clearFilters = isset($_GET["clear_filters"]) && $_GET["clear_filters"] === "1";
-$search = trim($_GET["search"] ?? "");
-$status = $clearFilters ? "all" : ($_GET["status"] ?? "all");
-$category = $clearFilters ? "" : trim($_GET["category"] ?? "");
-$location = $clearFilters ? "" : trim($_GET["location"] ?? "");
-$dateFrom = $clearFilters ? "" : trim($_GET["date_from"] ?? "");
-$dateError = "";
-
-// Accept only valid filter options
-if (!in_array($status, ["all", "lost", "found"], true)) {
-    $status = "all";
-}
-
-if (!isValidPastOrPresentItemDate($dateFrom)) {
-    $dateError = "Choose a valid incident date up to today.";
-    $dateFrom = "";
-}
-
-$categoryOptions = [];
-$categoryResult = $conn->query("SELECT name FROM item_categories WHERE is_active = 1 ORDER BY name");
-if ($categoryResult) {
-    while ($categoryRow = $categoryResult->fetch_assoc()) {
-        $categoryOptions[] = (string) $categoryRow["name"];
-    }
-}
-if ($category !== "" && !in_array($category, $categoryOptions, true)) {
-    $category = "";
-}
-
-// Match each meaningful search word across public item details.
 $sql = "SELECT items.item_id, items.item_name,
                items.description, items.category,
                items.status, items.location,
                items.date_lost_found, items.created_at,
                items.image, items.user_id, items.owner_hint, users.full_name
         FROM items
-        INNER JOIN users ON items.user_id = users.user_id
-        WHERE items.resolved_at IS NULL AND items.is_hidden = 0";
-
-$searchTerms = $clearFilters
-    ? []
-    : array_slice(smartAssistantTokens($search), 0, 8);
-
-$queryValues = [];
-foreach ($searchTerms as $term) {
-    $sql .= " AND (items.item_name LIKE ? OR items.description LIKE ?
-                    OR items.category LIKE ? OR items.location LIKE ?)";
-    $likeTerm = "%" . escapeLikeValue($term) . "%";
-    array_push($queryValues, $likeTerm, $likeTerm, $likeTerm, $likeTerm);
-}
-
-if (!$clearFilters && $status !== "all") {
-    $sql .= " AND items.status = ?";
-    $queryValues[] = $status;
-}
-
-$filtersActive = !$clearFilters && (
-    $search !== "" || $status !== "all" || $category !== ""
-    || $location !== "" || $dateFrom !== ""
-);
-
-if (!$clearFilters && $category !== "") {
-    $sql .= " AND items.category = ?";
-    $queryValues[] = $category;
-}
-
-if (!$clearFilters && $location !== "") {
-    $sql .= " AND items.location LIKE ?";
-    $queryValues[] = "%" . escapeLikeValue($location) . "%";
-}
-
-if (!$clearFilters && $dateFrom !== "") {
-    $sql .= " AND items.date_lost_found >= ?";
-    $queryValues[] = $dateFrom;
-}
-
-$sql .= " ORDER BY items.created_at DESC, items.item_id DESC";
-$sql .= " LIMIT 3";
+        INNER JOIN users ON items.user_id = users.user_id";
+$sql .= " WHERE items.resolved_at IS NULL AND items.is_hidden = 0
+          ORDER BY items.created_at DESC, items.item_id DESC
+          LIMIT 3";
 
 $stmt = $conn->prepare($sql);
 $result = null;
@@ -99,18 +23,7 @@ $loadError = "";
 if ($stmt === false) {
     $loadError = "Unable to load items right now.";
 } else {
-    if ($queryValues !== []) {
-        $bindArguments = [str_repeat("s", count($queryValues))];
-        foreach ($queryValues as $index => &$queryValue) {
-            $bindArguments[] = &$queryValue;
-        }
-        unset($queryValue);
-        $bindResult = call_user_func_array([$stmt, "bind_param"], $bindArguments);
-    } else {
-        $bindResult = true;
-    }
-
-    if ($bindResult === false || !$stmt->execute()) {
+    if (!$stmt->execute()) {
         $loadError = "Unable to load items right now.";
     } else {
         $result = $stmt->get_result();
@@ -148,7 +61,6 @@ if (isset($_SESSION["user_id"])) {
     <title>Lost and Found System</title>
     <link rel="stylesheet" href="css/style.css?v=theme-20261014-12">
     <script src="navigation.js" defer></script>
-    <script src="date-range.js" defer></script>
 </head>
 <body>
 <?php require __DIR__ . "/site_header.php"; ?>
@@ -164,7 +76,7 @@ if (isset($_SESSION["user_id"])) {
                 <h1 id="home-hero-title">Lost Something? <span>Let's Help You Find It.</span></h1>
                 <p class="home-hero-subtitle">Connect with people reporting lost and found belongings, search active listings, and help return important items to their owners.</p>
                 <div class="home-hero-actions">
-                    <a class="button home-primary-action" href="#find-an-item">Find an Item</a>
+                    <a class="button home-primary-action" href="all_items.php">Find an Item</a>
                     <?php if (isset($_SESSION["user_id"])): ?>
                         <a class="button button-secondary home-secondary-action" href="report_item.php">Report an Item</a>
                     <?php else: ?>
@@ -176,131 +88,7 @@ if (isset($_SESSION["user_id"])) {
         </section>
 
         <div class="container home-content">
-            <section class="search-panel" id="find-an-item">
-                <p class="lead">Search by item name, description, category, or location.</p>
-                <div class="browse-shortcuts">
-                    <a href="lost_items.php" class="button button-small button-secondary">Browse Lost Items</a>
-                    <a href="found_items.php" class="button button-small button-secondary">Browse Found Items</a>
-                </div>
-                <h2>Find an Item</h2>
-
-                <!-- Search and filter form -->
-                <form method="GET" action="index.php" class="search-form">
-                
-<div class="field-group search-field-group">
-    <label class="visually-hidden" for="search">Search by name, description, category, or location</label>
-    <div class="search-input-wrap">
-        <input
-            type="search"
-            id="search"
-            name="search"
-            placeholder="Search items"
-            value="<?= htmlspecialchars($search) ?>"
-        >
-        <button class="search-submit" type="submit" aria-label="Search items" title="Search">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="10.8" cy="10.8" r="6.3"></circle>
-                <path d="m15.5 15.5 5 5"></path>
-            </svg>
-        </button>
-</div>
-</div>
-<div class="field-group">
-    <label for="date_from">Filter by date</label>
-    <input
-        type="date"
-        id="date_from"
-        name="date_from"
-        value="<?= htmlspecialchars($dateFrom, ENT_QUOTES, 'UTF-8') ?>"
-    >
-</div>
-
-                <div class="field-group">
-                    <label class="visually-hidden" for="status">Filter by status</label>
-                    <select id="status" name="status">
-                        <option value="all"
-                            <?= $status === "all" ? "selected" : "" ?>>
-                            All
-                        </option>
-
-                        <option value="lost"
-                            <?= $status === "lost" ? "selected" : "" ?>>
-                            Lost
-                        </option>
-
-                        <option value="found"
-                            <?= $status === "found" ? "selected" : "" ?>>
-                            Found
-                        </option>
-                    </select>
-                </div>
-
-                <div class="field-group">
-                    <label class="visually-hidden" for="category">Filter by category</label>
-                    <select id="category" name="category">
-                        <option value="">All categories</option>
-                        <?php foreach ($categoryOptions as $categoryOption): ?>
-                            <option value="<?= htmlspecialchars($categoryOption, ENT_QUOTES, "UTF-8") ?>"
-                                <?= $category === $categoryOption ? "selected" : "" ?>>
-                                <?= htmlspecialchars($categoryOption) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-<div class="field-group">
-    <label class="visually-hidden" for="location">Filter by location</label>
-
-    <input
-        type="search"
-        id="location"
-        name="location"
-        placeholder="Enter a location where the item was lost or found"
-        value="<?= htmlspecialchars($location, ENT_QUOTES, 'UTF-8') ?>"
-    >
-</div>
-
-
-
-                <?php if ($dateError !== ""): ?>
-                    <p class="form-error full-width" role="alert"><?= htmlspecialchars($dateError, ENT_QUOTES, "UTF-8") ?></p>
-                <?php endif; ?>               
-
-
-
-
-
-
-<button
-    type="button"
-    class="clear-link"
-    id="clear-filters-button">
-    Clear filters
-</button>
-
-
-
-<script>
-document.getElementById("clear-filters-button").addEventListener("click", function () {
-    const searchInput = document.getElementById("search");
-    const searchText = searchInput ? searchInput.value : "";
-
-    const url = new URL(window.location.href);
-
-    url.search = "";
-    url.searchParams.set("clear_filters", "1");
-    url.searchParams.set("search", searchText);
-
-    window.location.href = url.toString();
-});
-</script>
-
-
-
-                </form>
-            </section>
-
-             <section id="item-results"> 
+             <section id="item-results">
             <div class="section-header">
                 <h2>Recently Reported Items</h2>
             </div>

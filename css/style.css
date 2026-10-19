@@ -3413,8 +3413,8 @@ html[data-theme="dark"] tr:nth-child(even) {
         overflow: hidden;
         border: 1px solid var(--border);
         border-radius: 16px;
-        background: rgba(255, 255, 255, 0.62);
-        box-shadow: 0 10px 26px rgba(15, 32, 52, 0.08);
+        background: rgba(242, 241, 245, 0.62);
+        box-shadow: 0 10px 26px #141414 !important;
     }
 
     .claims-table tbody td {
@@ -3426,7 +3426,10 @@ html[data-theme="dark"] tr:nth-child(even) {
         border: 1px solid var(--border);
         font-size: 0.88rem;
     }
-
+.claims-table tbody td[data-label="Local review signal"] strong,
+.claims-table tbody td[data-label="Local review signal"] small {
+    color: #ffffff !important;
+}
     .claims-table tbody td::before {
         content: attr(data-label);
         color: var(--muted);
@@ -3817,15 +3820,7 @@ main table :is(h1, h2, h3, h4, p, label, legend, small, strong, dt, dd, figcapti
 }
 
 .home-hero::after {
-    position: absolute;
-    right: 5%;
-    bottom: -90px;
-    width: 280px;
-    height: 280px;
-    content: "";
-    border: 1px solid rgba(117, 216, 255, 0.24);
-    border-radius: 50%;
-    pointer-events: none;
+    content: none;
 }
 
 .home-hero-content {
@@ -4945,26 +4940,21 @@ html[data-theme] body {
     color: var(--pro-text);
     background: url("../assets/site-background.jpg") center / cover fixed no-repeat !important;
 }
-
-body::before {
-    position: fixed;
-    z-index: -1;
-    inset: 0;
-    background: rgba(4, 14, 26, 0.24);
-    content: "";
-    pointer-events: none;
+body,
+html[data-theme] body {
+    background-color: transparent !important;
 }
 
+body::before {
+    content: none;
+}
+
+/* Make structural layout wrappers transparent so margins show the background image */
 :is(
-    .site-header,
-    .site-footer,
-    .profile-menu,
     .search-panel,
-    .item-card,
     .item-detail-card,
     .auth-container,
     .form-container,
-    .account-card,
     .notification-card,
     .settings-card,
     .settings-grid,
@@ -4972,25 +4962,33 @@ body::before {
     .settings-admin-menu,
     .settings-admin-links,
     .hub-grid,
-    .hub-card,
     .admin-panel,
     .dashboard-section,
-    .dashboard-card,
     .dashboard-hero,
     .admin-page-header,
     .dashboard-links,
-    .returned-card,
     .profile-details-card,
     .browse-intro,
     .empty-state,
     .local-help-panel,
     .settings-dialog.is-modal,
-    .settings-dialog-header,
-    table,
-    .claims-table,
-    [class*="card"],
-    [class*="panel"],
-    [class*="menu"]
+    .settings-dialog-header
+) {
+    color: var(--pro-text);
+    background: transparent !important;
+    border-color: var(--pro-border);
+    box-shadow: none !important;
+}
+
+/* Keep individual item cards, dashboard cards, and headers/footers solid */
+:is(
+    .site-header,
+    .site-footer,
+    .item-card,
+    .dashboard-card,
+    .account-card,
+    .returned-card,
+    .profile-menu
 ) {
     color: var(--pro-text);
     background: var(--pro-surface) !important;
@@ -5177,32 +5175,7 @@ header:not(.site-header) {
     width: 100%;
 }
 
-.home-content .search-input-wrap {
-    position: relative;
-    width: 100%;
-    min-width: 0;
-}
 
-.home-content .search-input-wrap input[type="search"] {
-    width: 100%;
-    box-sizing: border-box;
-    padding-right: 54px;
-}
-
-.home-content .search-input-wrap .search-submit {
-    position: absolute;
-    right: 4px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    min-width: 40px;
-    height: 36px;
-    padding: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
-}
 
 /* Make calendar icons visible throughout the app */
 input[type="date"]::-webkit-calendar-picker-indicator {
@@ -5404,4 +5377,303 @@ main .private-handover-details textarea::placeholder {
     .home-hero-content {
         transform: translateY(-2cm);
     }
+}
+
+/* =========================================
+   ALL REPORTED ITEMS PAGE - FILTER LAYOUT
+   ========================================= */
+
+.browse-page form.search-form {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 150px 180px !important;
+    gap: 10px;
+    align-items: end;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Prevent grid children from forcing overflow */
+.browse-page form.search-form > .field-group {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+}
+
+/* Search input: first column, first row */
+.browse-page form.search-form > .search-field-group {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.browse-page .search-input-wrap {
+    position: relative;
+    display: block;
+    width: 100%;
+    min-width: 0;
+}
+
+.browse-page .search-input-wrap input[type="search"] {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding-right: 55px;
+}
+
+/* Keep the search button INSIDE the input */
+.browse-page .search-input-wrap > .search-submit {
+    position: absolute !important;
+    top: 50% !important;
+    right: 5px !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: translateY(-50%) !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    height: 36px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex: none;
+    box-sizing: border-box;
+    z-index: 2;
+}
+
+.browse-page .search-input-wrap > .search-submit svg {
+    display: block;
+    width: 21px;
+    height: 21px;
+    flex-shrink: 0;
+}
+
+/* Date: second column, first row */
+.browse-page form.search-form > .field-group:nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+/* Status: third column, first row */
+.browse-page form.search-form > .field-group:nth-child(3) {
+    grid-column: 3;
+    grid-row: 1;
+}
+
+/* Category: first column, second row */
+.browse-page form.search-form > .field-group:nth-child(4) {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+/* Location: second column, second row */
+.browse-page form.search-form > .field-group:nth-child(5) {
+    grid-column: 2;
+    grid-row: 2;
+}
+
+/* Clear filters: third column, second row */
+.browse-page form.search-form > .clear-link {
+    grid-column: 3;
+    grid-row: 2;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    align-self: end;
+    box-sizing: border-box;
+}
+
+/* Tablet layout */
+@media (max-width: 768px) {
+    .browse-page form.search-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .browse-page form.search-form > .search-field-group {
+        grid-column: 1 / -1;
+        grid-row: auto;
+    }
+
+    .browse-page form.search-form > .field-group:nth-child(2),
+    .browse-page form.search-form > .field-group:nth-child(3),
+    .browse-page form.search-form > .field-group:nth-child(4),
+    .browse-page form.search-form > .field-group:nth-child(5),
+    .browse-page form.search-form > .clear-link {
+        grid-column: auto;
+        grid-row: auto;
+    }
+
+    .browse-page form.search-form > .field-group:nth-child(4) {
+        grid-column: 1 / -1;
+    }
+}
+
+/* Mobile layout */
+@media (max-width: 480px) {
+    .browse-page form.search-form {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .browse-page form.search-form > .search-field-group,
+    .browse-page form.search-form > .field-group:nth-child(2),
+    .browse-page form.search-form > .field-group:nth-child(3),
+    .browse-page form.search-form > .field-group:nth-child(4),
+    .browse-page form.search-form > .field-group:nth-child(5),
+    .browse-page form.search-form > .clear-link {
+        grid-column: 1;
+        grid-row: auto;
+    }
+}
+
+/* Desktop layout adjustment */
+@media (min-width: 769px) {
+    .browse-page form.search-form {
+        display: grid !important;
+        grid-template-columns: minmax(250px, 1fr) minmax(130px, 170px) minmax(140px, 180px);
+        gap: 16px;
+        align-items: end;
+    }
+
+    .browse-page form.search-form > .search-field-group {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    .browse-page form.search-form > .field-group:nth-child(2) {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .browse-page form.search-form > .field-group:nth-child(3) {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    .browse-page form.search-form > .field-group:nth-child(4) {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    .browse-page form.search-form > .field-group:nth-child(5) {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    .browse-page form.search-form > .clear-link {
+        grid-column: 3;
+        grid-row: 2;
+    }
+}
+
+/* ADMIN: MANAGE CLAIMS TABLE FIX */
+.admin-page table,
+.admin-content table,
+.dashboard-container table,
+table {
+    width: 100%;
+    min-width: 1500px;
+    table-layout: auto;
+    border-collapse: collapse;
+}
+
+/* Keep column headings readable */
+.admin-page th,
+.admin-content th,
+.dashboard-container th,
+table th {
+    white-space: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+    vertical-align: top;
+    padding: 12px 10px;
+    text-align: left;
+}
+
+/* Make claim details readable */
+.admin-page td,
+.admin-content td,
+.dashboard-container td,
+table td {
+    padding: 12px 10px;
+    vertical-align: top;
+    overflow-wrap: break-word;
+    word-break: normal;
+    line-height: 1.5;
+}
+
+/* Prevent action buttons from breaking into individual letters */
+table td button,
+table td input[type="submit"],
+table td .btn,
+table td a {
+    word-break: normal;
+    overflow-wrap: normal;
+    white-space: normal;
+    max-width: 180px;
+}
+
+/* Keep the claims table within the available page width */
+.admin-page,
+.admin-content,
+.dashboard-container {
+    min-width: 0;
+}
+
+/* Preserve readable table headings and content */
+table th {
+    color: #fff;
+}
+
+table td {
+    color: #fff;
+}
+
+/* Keep review signals readable */
+table td small,
+table td .review-signal {
+    color: #fff;
+}
+
+/* COMPACT MANAGE CLAIMS TABLE */
+.admin-page table th,
+.admin-page table td,
+.admin-content table th,
+.admin-content table td,
+.dashboard-container table th,
+.dashboard-container table td,
+table th,
+table td {
+    padding: 6px 8px !important;
+    line-height: 1.25 !important;
+    vertical-align: top;
+}
+
+/* Prevent long words from breaking unnecessarily */
+table th {
+    word-break: normal;
+    overflow-wrap: normal;
+}
+
+table td {
+    word-break: normal;
+    overflow-wrap: anywhere;
+}
+
+/* Keep action buttons compact */
+table td button,
+table td .btn,
+table td input[type="submit"],
+table td a {
+    padding: 6px 10px;
+    line-height: 1.2;
+    min-height: 0;
+}
+
+/* Stop form controls from stretching rows */
+table td textarea {
+    max-width: 100%;
+    min-height: 60px;
+    box-sizing: border-box;
 }

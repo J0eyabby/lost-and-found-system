@@ -12,22 +12,21 @@ function escapeAllItemsLikeValue(string $value): string
 }
 
 $userId = (int) ($_SESSION["user_id"] ?? 0);
+$clearFilters = isset($_GET["clear_filters"]) && $_GET["clear_filters"] === "1";
 $search = trim($_GET["search"] ?? "");
-$category = trim($_GET["category"] ?? "");
-$location = trim($_GET["location"] ?? "");
-$dateFrom = trim($_GET["date_from"] ?? "");
-$dateTo = trim($_GET["date_to"] ?? "");
-$status = trim($_GET["status"] ?? "all");
+$status = $clearFilters ? "all" : trim($_GET["status"] ?? "all");
+$category = $clearFilters ? "" : trim($_GET["category"] ?? "");
+$location = $clearFilters ? "" : trim($_GET["location"] ?? "");
+$dateFrom = $clearFilters ? "" : trim($_GET["date_from"] ?? "");
 $dateError = "";
 
 if (!in_array($status, ["all", "lost", "found"], true)) {
     $status = "all";
 }
 
-if (!isValidPastOrPresentDateRange($dateFrom, $dateTo)) {
-    $dateError = "Choose valid dates up to today, with the From date no later than the To date.";
+if (!isValidPastOrPresentItemDate($dateFrom)) {
+    $dateError = "Choose a valid incident date up to today.";
     $dateFrom = "";
-    $dateTo = "";
 }
 
 $categoryOptions = [];
@@ -77,11 +76,6 @@ if ($dateFrom !== "") {
     $queryValues[] = $dateFrom;
 }
 
-if ($dateTo !== "") {
-    $sql .= " AND items.date_lost_found <= ?";
-    $queryValues[] = $dateTo;
-}
-
 $sql .= " ORDER BY items.created_at DESC, items.item_id DESC";
 
 $stmt = $conn->prepare($sql);
@@ -124,8 +118,6 @@ if ($userId > 0) {
     }
 }
 
-$filtersActive = $search !== "" || $category !== "" || $location !== ""
-    || $dateFrom !== "" || $dateTo !== "" || $status !== "all";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -141,38 +133,78 @@ $filtersActive = $search !== "" || $category !== "" || $location !== ""
 <main class="container browse-page">
     <h1 class="browse-title">All Reported Items</h1>
 
-    <form method="GET" class="browse-search browse-filter-form">
-        <label for="search">Search by name, description, category, or location</label>
-        <input id="search" name="search" type="search" value="<?= htmlspecialchars($search) ?>" placeholder="Describe what you remember">
-        <label for="category">Category</label>
-        <select id="category" name="category">
-            <option value="">All categories</option>
-            <?php foreach ($categoryOptions as $categoryOption): ?>
-                <option value="<?= htmlspecialchars($categoryOption, ENT_QUOTES, "UTF-8") ?>"
-                    <?= $category === $categoryOption ? "selected" : "" ?>>
-                    <?= htmlspecialchars($categoryOption) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-        <label for="location">Location</label>
-        <input id="location" name="location" type="search" value="<?= htmlspecialchars($location) ?>" placeholder="Location">
-        <label for="date-from">Incident date from</label>
-        <input id="date-from" name="date_from" type="date" max="<?= date("Y-m-d") ?>" value="<?= htmlspecialchars($dateFrom) ?>">
-        <label for="date-to">Incident date to</label>
-        <input id="date-to" name="date_to" type="date" max="<?= date("Y-m-d") ?>" value="<?= htmlspecialchars($dateTo) ?>">
-        <label for="status">Status</label>
-        <select id="status" name="status">
-            <option value="all" <?= $status === "all" ? "selected" : "" ?>>All statuses</option>
-            <option value="lost" <?= $status === "lost" ? "selected" : "" ?>>Lost</option>
-            <option value="found" <?= $status === "found" ? "selected" : "" ?>>Found</option>
-        </select>
-        <button type="submit">Search</button>
+    <form method="GET" action="all_items.php" class="search-form">
+        <div class="field-group search-field-group">
+            <label class="visually-hidden" for="search">Search by name, description, category, or location</label>
+            <div class="search-input-wrap">
+                <input
+                    type="search"
+                    id="search"
+                    name="search"
+                    placeholder="Search items"
+                    value="<?= htmlspecialchars($search) ?>"
+                >
+                <button class="search-submit" type="submit" aria-label="Search items" title="Search">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="10.8" cy="10.8" r="6.3"></circle>
+                        <path d="m15.5 15.5 5 5"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="field-group">
+            <label for="date_from">Filter by date</label>
+            <input
+                type="date"
+                id="date_from"
+                name="date_from"
+                value="<?= htmlspecialchars($dateFrom, ENT_QUOTES, "UTF-8") ?>"
+            >
+        </div>
+        <div class="field-group">
+            <label class="visually-hidden" for="status">Filter by status</label>
+            <select id="status" name="status">
+                <option value="all" <?= $status === "all" ? "selected" : "" ?>>All</option>
+                <option value="lost" <?= $status === "lost" ? "selected" : "" ?>>Lost</option>
+                <option value="found" <?= $status === "found" ? "selected" : "" ?>>Found</option>
+            </select>
+        </div>
+        <div class="field-group">
+            <label class="visually-hidden" for="category">Filter by category</label>
+            <select id="category" name="category">
+                <option value="">All categories</option>
+                <?php foreach ($categoryOptions as $categoryOption): ?>
+                    <option value="<?= htmlspecialchars($categoryOption, ENT_QUOTES, "UTF-8") ?>"
+                        <?= $category === $categoryOption ? "selected" : "" ?>>
+                        <?= htmlspecialchars($categoryOption) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="field-group">
+            <label class="visually-hidden" for="location">Filter by location</label>
+            <input
+                type="search"
+                id="location"
+                name="location"
+                placeholder="Enter a location where the item was lost or found"
+                value="<?= htmlspecialchars($location, ENT_QUOTES, "UTF-8") ?>"
+            >
+        </div>
         <?php if ($dateError !== ""): ?>
             <p class="form-error" role="alert"><?= htmlspecialchars($dateError, ENT_QUOTES, "UTF-8") ?></p>
         <?php endif; ?>
-        <?php if ($filtersActive): ?>
-            <a href="all_items.php" class="clear-link">Clear filters</a>
-        <?php endif; ?>
+        <button type="button" class="clear-link" id="clear-filters-button">Clear filters</button>
+        <script>
+        document.getElementById("clear-filters-button").addEventListener("click", function () {
+            const searchInput = document.getElementById("search");
+            const url = new URL(window.location.href);
+            url.search = "";
+            url.searchParams.set("clear_filters", "1");
+            url.searchParams.set("search", searchInput ? searchInput.value : "");
+            window.location.href = url.toString();
+        });
+        </script>
     </form>
 
     <section class="browse-intro">
