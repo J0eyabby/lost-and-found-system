@@ -3414,7 +3414,7 @@ html[data-theme="dark"] tr:nth-child(even) {
         border: 1px solid var(--border);
         border-radius: 16px;
         background: rgba(242, 241, 245, 0.62);
-        box-shadow: 0 10px 26px #141414 !important;
+        box-shadow: 0 10px 26px #7bb9ec !important;
     }
 
     .claims-table tbody td {
