@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . "/session_bootstrap.php";
-require_once "db.php";
-require_once "mail_notifications.php";
+require_once __DIR__ . "/db.php";
+require_once __DIR__ . "/mail_notifications.php";
 require_once __DIR__ . "/user_notifications.php";
 require_once __DIR__ . "/item_date_validation.php";
 require_once __DIR__ . "/activity_log.php";

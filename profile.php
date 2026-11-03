@@ -35,7 +35,9 @@ function sendEmailChangeLink(string $email, string $url): bool
         $mail->SMTPAuth = true;
         $mail->Username = $mailConfig["username"];
         $mail->Password = $mailConfig["password"];
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->SMTPSecure = $mailConfig["encryption"] === "ssl"
+            ? PHPMailer::ENCRYPTION_SMTPS
+            : PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = (int) $mailConfig["port"];
         $mail->setFrom($mailConfig["username"], "Lost and Found System");
         $mail->addAddress($email);

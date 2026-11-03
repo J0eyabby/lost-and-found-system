@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . "/session_bootstrap.php";
-require_once "db.php";
+require_once __DIR__ . "/db.php";
 
 // Only administrators can access this page
 if (!isset($_SESSION["user_id"])) {

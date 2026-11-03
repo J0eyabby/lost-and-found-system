@@ -29,6 +29,9 @@ function dbHasColumn(mysqli $connection, string $table, string $column): bool
         return false;
     }
 
-    return $result->num_rows > 0;
+    $hasColumn = $result->num_rows > 0;
+    $result->free();
+
+    return $hasColumn;
 }
 ?>

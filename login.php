@@ -1,8 +1,8 @@
 <?php
 
 require_once __DIR__ . "/session_bootstrap.php";
-require_once "db.php";
-require_once "activity_log.php";
+require_once __DIR__ . "/db.php";
+require_once __DIR__ . "/activity_log.php";
 
 $message = "";
 $notice = $_SESSION["auth_notice"] ?? "";
