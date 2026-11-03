@@ -42,7 +42,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             if ($saveStmt->execute()) {
 
-$baseUrl = "http://localhost/lost_found";
+if (getenv("RENDER")) {
+    $baseUrl = "https://lost-found-uoek.onrender.com";
+} else {
+    $baseUrl = "http://localhost/lost_found";
+}
 
                 $resetUrl = $baseUrl . "/reset_password.php?token=" . urlencode($resetToken);
                 $subject = "Reset your Lost and Found password";
