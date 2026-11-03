@@ -51,96 +51,53 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     . "Use this link within one hour to choose a new password:\n"
                     . $resetUrl
                     . "\n\nIf you did not request this, you can ignore this email.";
-                    $mailSent = false;
-                    $resendApiKey = trim((string) getenv("RESEND_API_KEY"));
-                    $useResendLocally = filter_var(getenv("RESEND_USE_API"), FILTER_VALIDATE_BOOLEAN);
-                    $useResend = $isRender || $useResendLocally;
+                $mailSent = false;
 
-                    if ($useResend) {
-                        if ($resendApiKey === "") {
-                            error_log("Password reset email failed: RESEND_API_KEY is not configured.");
-                        } elseif (!function_exists("curl_init")) {
-                            error_log("Password reset email failed: PHP cURL is not available.");
-                        } else {
-                            $resendFrom = trim((string) (getenv("RESEND_FROM_EMAIL") ?: "onboarding@resend.dev"));
-                            $payload = json_encode([
-                                "from" => $resendFrom,
-                                "to" => [$email],
-                                "subject" => $subject,
-                                "text" => $body,
-                            ]);
+                try {
+                    $mailConfig = require __DIR__ . "/mail_config.php";
+                    $requiredMailSettings = ["host", "port", "username", "password", "encryption"];
+                    $missingMailSettings = array_filter(
+                        $requiredMailSettings,
+                        static fn(string $setting): bool => empty($mailConfig[$setting])
+                    );
 
-                            if ($payload === false) {
-                                error_log("Password reset email failed: could not encode Resend request.");
-                            } else {
-                                $curl = curl_init("https://api.resend.com/emails");
-                                curl_setopt_array($curl, [
-                                    CURLOPT_POST => true,
-                                    CURLOPT_RETURNTRANSFER => true,
-                                    CURLOPT_HTTPHEADER => [
-                                        "Authorization: Bearer " . $resendApiKey,
-                                        "Content-Type: application/json",
-                                    ],
-                                    CURLOPT_POSTFIELDS => $payload,
-                                    CURLOPT_TIMEOUT => 15,
-                                ]);
-                                $response = curl_exec($curl);
-                                $httpStatus = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
-                                $curlError = curl_error($curl);
-                                curl_close($curl);
-
-                                if ($response === false) {
-                                    error_log("Password reset email failed: Resend request error: " . $curlError);
-                                } elseif ($httpStatus >= 200 && $httpStatus < 300) {
-                                    $mailSent = true;
-                                } else {
-                                    $responseData = json_decode($response, true);
-                                    $errorMessage = is_array($responseData) && isset($responseData["message"])
-                                        ? (string) $responseData["message"]
-                                        : "unexpected response";
-                                    error_log(
-                                        "Password reset email failed: Resend returned HTTP "
-                                        . $httpStatus . " (" . $errorMessage . ")."
-                                    );
-                                }
-                            }
-                        }
+                    if ($missingMailSettings !== []) {
+                        error_log("Password reset email failed: SMTP configuration is incomplete.");
                     } else {
-                        try {
-                            $mailConfig = require __DIR__ . "/mail_config.php";
+                        $mail = new PHPMailer(true);
+                        $mail->isSMTP();
+                        $mail->Host = $mailConfig["host"];
+                        $mail->SMTPAuth = true;
+                        $mail->Username = $mailConfig["username"];
+                        $mail->Password = $mailConfig["password"];
+                        $mail->SMTPSecure = $mailConfig["encryption"] === "ssl"
+                            ? PHPMailer::ENCRYPTION_SMTPS
+                            : PHPMailer::ENCRYPTION_STARTTLS;
+                        $mail->Port = (int) $mailConfig["port"];
 
-                            $mail = new PHPMailer(true);
-                            $mail->isSMTP();
-                            $mail->Host = $mailConfig["host"];
-                            $mail->SMTPAuth = true;
-                            $mail->Username = $mailConfig["username"];
-                            $mail->Password = $mailConfig["password"];
-                            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                            $mail->Port = (int) $mailConfig["port"];
+                        $mail->setFrom($mailConfig["username"], "Lost and Found System");
+                        $mail->addAddress($email);
+                        $mail->Subject = $subject;
+                        $mail->Body = $body;
+                        $mail->send();
 
-                            $mail->setFrom($mailConfig["username"], "Lost and Found System");
-                            $mail->addAddress($email);
-                            $mail->Subject = $subject;
-                            $mail->Body = $body;
-                            $mail->send();
-
-                            $mailSent = true;
-                        } catch (Exception $error) {
-                            error_log("Password reset email failed: " . $error->getMessage());
-                        }
+                        $mailSent = true;
                     }
+                } catch (Exception $error) {
+                    error_log("Password reset email failed: " . $error->getMessage());
+                }
 
-                    $saveStmt->close();
+                $saveStmt->close();
 
-                    if (!$mailSent) {
-                        error_log("Password reset email could not be sent.");
-                        $removeStmt = $conn->prepare(
-                            "DELETE FROM password_resets WHERE user_id = ? AND token_hash = ?"
-                        );
-                        $removeStmt->bind_param("is", $userId, $tokenHash);
-                        $removeStmt->execute();
-                        $removeStmt->close();
-                    }
+                if (!$mailSent) {
+                    error_log("Password reset email could not be sent.");
+                    $removeStmt = $conn->prepare(
+                        "DELETE FROM password_resets WHERE user_id = ? AND token_hash = ?"
+                    );
+                    $removeStmt->bind_param("is", $userId, $tokenHash);
+                    $removeStmt->execute();
+                    $removeStmt->close();
+                }
             } else {
                 error_log("Password reset token could not be stored.");
                 $saveStmt->close();

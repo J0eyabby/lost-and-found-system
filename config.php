@@ -13,9 +13,9 @@ $database = getenv("DB_DATABASE") ?: "lost_found";
 $port = (int) (getenv("DB_PORT") ?: 3306);
 $mail_host = getenv("MAIL_HOST") ?: "smtp.gmail.com";
 $mail_port = (int) (getenv("MAIL_PORT") ?: 587);
-$mail_username = getenv("MAIL_USERNAME") ?: "";
-$mail_password = getenv("MAIL_PASSWORD") ?: "";
-$mail_encryption = getenv("MAIL_ENCRYPTION") ?: "tls";
+$mail_username = trim((string) getenv("MAIL_USERNAME"));
+$mail_password = (string) getenv("MAIL_PASSWORD");
+$mail_encryption = strtolower(trim((string) (getenv("MAIL_ENCRYPTION") ?: "tls")));
 
 $localConfigPath = __DIR__ . "/config.local.php";
 if (is_file($localConfigPath)) {
